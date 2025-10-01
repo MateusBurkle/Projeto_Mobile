@@ -1,7 +1,16 @@
 <resources>
+    -- Tela Principal --
     <string name="app_name">Projeto</string>
     <string name="welcome">Seja bem-vindo!</string>
     <string name="add_task">Adicionar Tarefa</string>
     <string name="see_progress">Ver o seu progresso</string>
     <string name="add_water_fab">Adicionar quantidade de água</string>
+
+    -- Tela Cadastro --
+    <string name="text_intro">Para começarmos, coloque as informações necessárias abaixo:</string>
+    <string name="hint_nome">Nome</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_senha">Senha</string>
+    <string name="hint_peso">Digite seu peso (kg)</string>
+    <string name="btn_cadastrar">Cadastrar</string>
 </resources>
