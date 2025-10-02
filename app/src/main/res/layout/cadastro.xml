@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/telaCadastro"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -13,51 +14,51 @@
             android:id="@+id/textIntro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
             android:text="@string/text_intro"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="24dp" />
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/editNome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:minHeight="48dp"
-            android:hint="@string/hint_nome"
             android:autofillHints="PersonName"
-            android:inputType="textPersonName"/>
+            android:hint="@string/hint_nome"
+            android:inputType="textPersonName"
+            android:minHeight="48dp" />
 
         <EditText
             android:id="@+id/editEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:minHeight="48dp"
-            android:hint="@string/hint_email"
             android:autofillHints="emailAddress"
-            android:inputType="textEmailAddress" />
+            android:hint="@string/hint_email"
+            android:inputType="textEmailAddress"
+            android:minHeight="48dp" />
 
         <EditText
             android:id="@+id/passwd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:minHeight="48dp"
-            android:hint="@string/hint_senha"
             android:autofillHints="password"
-            android:inputType="textPassword" />
+            android:hint="@string/hint_senha"
+            android:inputType="textPassword"
+            android:minHeight="48dp" />
 
         <EditText
             android:id="@+id/editPeso"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:minHeight="48dp"
-            android:hint="@string/hint_peso"
             android:autofillHints="BodyWeight"
-            android:inputType="number"/>
+            android:hint="@string/hint_peso"
+            android:inputType="number"
+            android:minHeight="48dp" />
 
         <Button
             android:id="@+id/btnCadastrar"

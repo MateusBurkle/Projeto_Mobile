@@ -15,17 +15,18 @@
         app:layout_scrollFlags="scroll|enterAlways"/>
 
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
+        android:id="@+id/telaRecursos"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <!-- opcional: métricas resumidas -->
         <com.google.android.material.card.MaterialCardView
@@ -35,22 +36,24 @@
             app:cardCornerRadius="16dp">
 
             <LinearLayout
-                android:padding="16dp"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
                 <TextView
                     android:id="@+id/txtResumo"
-                    android:text="Resumo semanal"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="Resumo semanal"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/txtMeta"
-                    android:text="Meta: 2000 ml/dia"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="Meta: 2000 ml/dia" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
