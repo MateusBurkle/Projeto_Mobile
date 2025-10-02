@@ -17,5 +17,12 @@ public class PrincipalActivity extends AppCompatActivity{
             Intent intent = new Intent(PrincipalActivity.this, TarefasActivity.class);
             startActivity(intent);
         });
+
+        Button btnProgresso = findViewById(R.id.btnProgresso);
+
+        btnProgresso.setOnClickListener(v -> {
+            Intent intent = new Intent(PrincipalActivity.this, ProgressoActivity.class);
+            startActivity(intent);
+        });
     }
 }

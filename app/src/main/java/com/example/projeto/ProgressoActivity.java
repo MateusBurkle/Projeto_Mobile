@@ -4,13 +4,13 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
-public class TarefasActivity extends AppCompatActivity{
+public class ProgressoActivity extends AppCompatActivity{
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.tarefas);
+        setContentView(R.layout.recursos);
 
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
 
         toolbar.setNavigationOnClickListener(v -> {
             finish();

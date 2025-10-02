@@ -109,7 +109,4 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Botão flutuante Salvar -->
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

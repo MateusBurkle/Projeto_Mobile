@@ -21,7 +21,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".PrincipalActivity" />
-        <activity android:name=".TarefasActivity" />
+
+        <activity android:name=".TarefasActivity"
+            android:parentActivityName=".PrincipalActivity" />
+
+        <activity android:name=".ProgressoActivity"
+            android:parentActivityName=".PrincipalActivity"/>
     </application>
 
 </manifest>
