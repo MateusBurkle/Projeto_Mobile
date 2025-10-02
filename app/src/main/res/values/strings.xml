@@ -1,7 +1,7 @@
 <resources>
     -- Tela Principal --
     <string name="app_name">Projeto</string>
-    <string name="welcome">Seja bem-vindo!</string>
+    <string name="welcome">Seja bem-vindo</string>
     <string name="add_task">Adicionar Tarefa</string>
     <string name="see_progress">Ver o seu progresso</string>
     <string name="add_water_fab">Adicionar quantidade de água</string>
