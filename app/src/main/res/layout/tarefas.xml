@@ -16,7 +16,7 @@
         app:navigationIcon="@drawable/arrow_back_24"
         app:title="Nova tarefa" />
 
-    <!-- Conteúdo rolável -->
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

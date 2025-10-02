@@ -44,7 +44,7 @@ public class PrincipalActivity extends AppCompatActivity {
             fabAddAgua.setOnClickListener(v -> abrirBottomSheetAgua());
         }
     }
-
+    // Melhorar essa parte do codigo ainda
     private void abrirBottomSheetAgua() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.add_agua, null);
