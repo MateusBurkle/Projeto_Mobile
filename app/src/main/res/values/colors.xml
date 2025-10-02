@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    -- Cores de fundo padrao --
+    <color name="green_primary">#4CAF50</color>
+    <color name="green_on_primary">#FFFFFF</color>
+    <color name="green_secondary">#388E3C</color>
 </resources>

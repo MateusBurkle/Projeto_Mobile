@@ -1,9 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Projeto" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
 
+    <style name="Base.Theme.Projeto" parent="Theme.Material3.DayNight.NoActionBar">
+        -- Cor principal --
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorOnPrimary">@color/green_on_primary</item>
+
+        -- Secundária (opcional) --
+        <item name="colorSecondary">@color/green_secondary</item>
     </style>
 
     <style name="Theme.Projeto" parent="Base.Theme.Projeto" />
