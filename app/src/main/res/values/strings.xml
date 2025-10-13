@@ -13,4 +13,10 @@
     <string name="hint_senha">Senha</string>
     <string name="hint_peso">Digite seu peso (kg)</string>
     <string name="btn_cadastrar">Cadastrar</string>
+
+    <!-- Mensagens de erro -->
+    <string name="error_nome_obrigatorio">O nome é obrigatório</string>
+    <string name="error_email_obrigatorio">O e-mail é obrigatório</string>
+    <string name="error_senha_obrigatoria">A senha é obrigatória</string>
+    <string name="error_peso_obrigatorio">O peso é obrigatório</string>
 </resources>
