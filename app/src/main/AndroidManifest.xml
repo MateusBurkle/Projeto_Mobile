@@ -21,12 +21,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.PrincipalActivity" />
+        <activity android:name=".ui.TarefasActivity" android:parentActivityName=".ui.PrincipalActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".ui.PrincipalActivity"/>
+        </activity>
+        <activity android:name=".ui.ProgressoActivity" android:parentActivityName=".ui.PrincipalActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".ui.PrincipalActivity"/>
+        </activity>
+        <activity android:name=".ui.ListaTarefasActivity" android:parentActivityName=".ui.PrincipalActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".ui.PrincipalActivity"/>
+        </activity>
 
-        <activity android:name=".ui.TarefasActivity"
-            android:parentActivityName=".ui.PrincipalActivity" />
 
-        <activity android:name=".ui.ProgressoActivity"
-            android:parentActivityName=".ui.PrincipalActivity"/>
     </application>
 
 </manifest>

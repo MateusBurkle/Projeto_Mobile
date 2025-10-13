@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:minHeight="64dp">
+
+    <!-- Título da tarefa -->
+    <TextView
+        android:id="@+id/tvTitulo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:text="Título da tarefa" />
+
+    <!-- Notas -->
+    <TextView
+        android:id="@+id/tvNotas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textSize="13sp"
+        android:textColor="#555555"
+        android:text="Notas da tarefa"
+        android:alpha="0.8"
+        android:layout_marginTop="2dp"/>
+
+    <!-- Subtarefas -->
+    <TextView
+        android:id="@+id/tvMeta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="#777777"
+        android:alpha="0.7"
+        android:layout_marginTop="4dp"
+        android:text="0 subtarefas" />
+</LinearLayout>
