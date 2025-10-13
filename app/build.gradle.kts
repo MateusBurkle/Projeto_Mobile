@@ -43,4 +43,7 @@ dependencies {
 
    // Biblioteca para montar o gráfico de barra usando MPAndroidChart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Biblioteca que transforma as tarefas em JSON
+    implementation("com.google.code.gson:gson:2.10.1")
 }

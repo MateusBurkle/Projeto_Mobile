@@ -6,5 +6,5 @@
         android:id="@+id/action_salvar"
         android:title="Salvar"
         android:icon="@drawable/check_24"
-        app:showAsAction="ifRoom|withText"/>
+        app:showAsAction="ifRoom|withText" />
 </menu>
