@@ -1,4 +1,4 @@
-package com.example.projeto;
+package com.example.projeto.models;
 
 import java.util.ArrayList;
 import java.util.UUID;

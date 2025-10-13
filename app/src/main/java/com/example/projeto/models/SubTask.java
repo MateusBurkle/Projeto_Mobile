@@ -1,4 +1,4 @@
-package com.example.projeto;
+package com.example.projeto.models;
 
 import java.util.UUID;
 public class SubTask {

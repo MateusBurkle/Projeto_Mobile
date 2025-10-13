@@ -1,4 +1,4 @@
-package com.example.projeto;
+package com.example.projeto.ui;
 
 import android.os.Bundle;
 
@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.widget.Button;
 
+import com.example.projeto.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 

@@ -1,4 +1,4 @@
-package com.example.projeto;
+package com.example.projeto.ui;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -9,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.projeto.R;
+import com.example.projeto.adapters.SubTarefasAdapter;
+import com.example.projeto.models.Task;
+import com.example.projeto.storage.TaskStorage;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

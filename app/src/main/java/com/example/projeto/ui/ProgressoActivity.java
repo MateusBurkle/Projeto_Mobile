@@ -1,7 +1,9 @@
-package com.example.projeto;
+package com.example.projeto.ui;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.projeto.R;
 import com.google.android.material.appbar.MaterialToolbar;
 
 

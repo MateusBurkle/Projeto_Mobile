@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Projeto">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,13 +20,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PrincipalActivity" />
+        <activity android:name=".ui.PrincipalActivity" />
 
-        <activity android:name=".TarefasActivity"
-            android:parentActivityName=".PrincipalActivity" />
+        <activity android:name=".ui.TarefasActivity"
+            android:parentActivityName=".ui.PrincipalActivity" />
 
-        <activity android:name=".ProgressoActivity"
-            android:parentActivityName=".PrincipalActivity"/>
+        <activity android:name=".ui.ProgressoActivity"
+            android:parentActivityName=".ui.PrincipalActivity"/>
     </application>
 
 </manifest>

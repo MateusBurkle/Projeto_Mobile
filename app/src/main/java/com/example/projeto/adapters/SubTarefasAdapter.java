@@ -1,4 +1,4 @@
-package com.example.projeto;
+package com.example.projeto.adapters;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,6 +10,8 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.projeto.R;
+import com.example.projeto.models.SubTask;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 

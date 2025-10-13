@@ -1,8 +1,9 @@
-package com.example.projeto;
+package com.example.projeto.storage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.projeto.models.Task;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
