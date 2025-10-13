@@ -30,6 +30,14 @@ public class PrincipalActivity extends AppCompatActivity {
                     startActivity(new Intent(this, TarefasActivity.class))
             );
         }
+        // Ver lista de tarefas
+        View btnVerListaTarefas = findViewById(R.id.btnVerListaTarefas);
+        if (btnVerListaTarefas != null) {
+            btnVerListaTarefas.setOnClickListener(v -> {
+                Intent intent = new Intent(PrincipalActivity.this, ListaTarefasActivity.class);
+                startActivity(intent);
+            });
+        }
 
         // Progresso
         View btnProgresso = findViewById(R.id.btnProgresso);
