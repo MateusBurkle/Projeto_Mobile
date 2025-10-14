@@ -14,7 +14,7 @@
 
         <!-- Launcher -->
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.CadastroActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +25,7 @@
         <activity android:name=".ui.PrincipalActivity" />
 
         <activity
-        android:name=".ui.CadastroActivity"
+        android:name=".ui.MainActivity"
         android:parentActivityName=".ui.PrincipalActivity">
         <meta-data
         android:name="android.support.PARENT_ACTIVITY"
