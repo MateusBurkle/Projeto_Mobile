@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_adicionar"
         android:title="Nova"
-        android:icon="@drawable/check_24"
+        android:icon="@drawable/ic_check_24"
         app:showAsAction="always" />
 </menu>

@@ -43,4 +43,14 @@ public class TaskStorage {
     public void clearAll() { // alteração opcional
         sp.edit().putString(KEY, "[]").apply();
     }
+    public void deleteById(String id) {                     // alteração
+        ArrayList<Task> list = getAll();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(id)) {
+                list.remove(i);
+                break;
+            }
+        }
+        saveAll(list);
+    }
 }

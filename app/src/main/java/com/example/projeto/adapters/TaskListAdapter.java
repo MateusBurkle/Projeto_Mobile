@@ -105,4 +105,20 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.VH> {
             h.itemView.setAlpha(1f);
         }
     }
+    public Task getItem(int position) { // alteração
+        return position >= 0 && position < getItemCount() ? data.get(position) : null;
+    }
+
+    public void removeAt(int position) { // alteração
+        if (position >= 0 && position < getItemCount()) {
+            data.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public void insertAt(int position, Task t) { // alteração
+        if (position < 0 || position > data.size()) position = data.size();
+        data.add(position, t);
+        notifyItemInserted(position);
+    }
 }
