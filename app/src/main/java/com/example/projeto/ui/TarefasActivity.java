@@ -30,7 +30,7 @@ public class TarefasActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.tarefas);
+        setContentView(R.layout.activity_tarefas);
 
         storage = new TaskStorage(this);
         topAppBar = findViewById(R.id.topAppBar);

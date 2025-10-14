@@ -11,7 +11,7 @@ public class ProgressoActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recursos);
+        setContentView(R.layout.layout_recursos);
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
 

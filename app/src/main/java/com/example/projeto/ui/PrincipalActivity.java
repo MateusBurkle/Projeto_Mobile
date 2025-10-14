@@ -21,7 +21,7 @@ public class PrincipalActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.principal);
+        setContentView(R.layout.activity_principal);
 
         // Adicionar Tarefa
         View btnAdicionarTarefa = findViewById(R.id.btnAdicionarTarefa);
@@ -56,7 +56,7 @@ public class PrincipalActivity extends AppCompatActivity {
     // Melhorar essa parte do codigo ainda
     private void abrirBottomSheetAgua() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.add_agua, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.activity_add_agua, null);
         dialog.setContentView(view);
 
         RadioGroup rgUnidade = view.findViewById(R.id.rgUnidade);

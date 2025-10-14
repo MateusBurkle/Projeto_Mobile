@@ -43,7 +43,7 @@ public class SubTarefasAdapter extends RecyclerView.Adapter<SubTarefasAdapter.VH
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.subtarefa, parent, false);
+                .inflate(R.layout.activity_subtarefas, parent, false);
         return new VH(v);
     }
 
