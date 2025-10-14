@@ -47,24 +47,16 @@ public class CadastroActivity extends AppCompatActivity {
                 return;
             }
 
-            int metaML = kg * 40; // já está aí
-
-            boolean ok = getSharedPreferences("user_prefs", MODE_PRIVATE)
+            int metaML = kg * 40;
+            getSharedPreferences("user_prefs", MODE_PRIVATE)
                     .edit()
                     .putInt("weight_kg", kg)
                     .putInt("daily_goal_ml", metaML)
-                    .commit(); // alteração: grava síncrono
+                    .commit();
 
-
-            int check = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                    .getInt("daily_goal_ml", -1);
-
-            Toast.makeText(this,
-                    "Meta salva? " + ok + " | meta = " + check + " ml",
-                    Toast.LENGTH_SHORT).show();
-
-
-            startActivity(new Intent(this, ProgressoActivity.class));
+            Intent i = new Intent(this, PrincipalActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
             finish();
 
         } catch (NumberFormatException e) {

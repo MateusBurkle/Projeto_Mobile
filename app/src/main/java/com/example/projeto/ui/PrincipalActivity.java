@@ -1,5 +1,6 @@
 package com.example.projeto.ui;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
@@ -24,14 +25,6 @@ public class PrincipalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
-        // Para poder pegar o valor de meta diaria de agua
-        int weight = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                .getInt("weight_kg", 0);
-        if (weight <= 0) {
-            startActivity(new Intent(this, CadastroActivity.class));
-            finish();
-            return;
-        }
         // Adicionar Tarefa
         View btnAdicionarTarefa = findViewById(R.id.btnAdicionarTarefa);
         if (btnAdicionarTarefa != null) {
@@ -71,24 +64,12 @@ public class PrincipalActivity extends AppCompatActivity {
 
         TextView tvMeta = view.findViewById(R.id.tvMetaDiaria);
 
-        int goal = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                .getInt("daily_goal_ml", -1);
-
-        if (goal <= 0) {
-            int weight = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                    .getInt("weight_kg", 0);
-            if (weight > 0) {
-                goal = weight * 40;
-                getSharedPreferences("user_prefs", MODE_PRIVATE)
-                        .edit()
-                        .putInt("daily_goal_ml", goal)
-                        .apply();
-            } else {
-                goal = 2000;
-            }
-        }
-
+        SharedPreferences sp = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        int weight = sp.getInt("weight_kg", 0);
+        int goal = (weight > 0) ? weight * 40 : 2000;
+        sp.edit().putInt("daily_goal_ml", goal).apply();
         tvMeta.setText("Meta diária: " + goal + " ml");
+
 
         RadioGroup rgUnidade = view.findViewById(R.id.rgUnidade);
         MaterialRadioButton rbMl = view.findViewById(R.id.rbMl);
