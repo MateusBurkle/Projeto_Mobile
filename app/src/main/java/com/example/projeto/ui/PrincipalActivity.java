@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.projeto.R;
@@ -23,6 +24,14 @@ public class PrincipalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
+        // Para poder pegar o valor de meta diaria de agua
+        int weight = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                .getInt("weight_kg", 0);
+        if (weight <= 0) {
+            startActivity(new Intent(this, CadastroActivity.class));
+            finish();
+            return;
+        }
         // Adicionar Tarefa
         View btnAdicionarTarefa = findViewById(R.id.btnAdicionarTarefa);
         if (btnAdicionarTarefa != null) {
@@ -53,11 +62,33 @@ public class PrincipalActivity extends AppCompatActivity {
             fabAddAgua.setOnClickListener(v -> abrirBottomSheetAgua());
         }
     }
+
     // Melhorar essa parte do codigo ainda
     private void abrirBottomSheetAgua() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.activity_add_agua, null);
         dialog.setContentView(view);
+
+        TextView tvMeta = view.findViewById(R.id.tvMetaDiaria);
+
+        int goal = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                .getInt("daily_goal_ml", -1);
+
+        if (goal <= 0) {
+            int weight = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                    .getInt("weight_kg", 0);
+            if (weight > 0) {
+                goal = weight * 40;
+                getSharedPreferences("user_prefs", MODE_PRIVATE)
+                        .edit()
+                        .putInt("daily_goal_ml", goal)
+                        .apply();
+            } else {
+                goal = 2000;
+            }
+        }
+
+        tvMeta.setText("Meta diária: " + goal + " ml");
 
         RadioGroup rgUnidade = view.findViewById(R.id.rgUnidade);
         MaterialRadioButton rbMl = view.findViewById(R.id.rbMl);

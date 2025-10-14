@@ -47,19 +47,24 @@ public class CadastroActivity extends AppCompatActivity {
                 return;
             }
 
-            int metaMl = kg * 40;
+            int metaML = kg * 40; // já está aí
 
-            // salvar em SharedPreferences (simples)
-            getSharedPreferences("user_prefs", MODE_PRIVATE)
+            boolean ok = getSharedPreferences("user_prefs", MODE_PRIVATE)
                     .edit()
                     .putInt("weight_kg", kg)
-                    .putInt("daily_goal_ml", metaMl)
-                    .apply();
-
-            Toast.makeText(this, "Meta diária: " + metaMl + " ml", Toast.LENGTH_SHORT).show(); // alteração
+                    .putInt("daily_goal_ml", metaML)
+                    .commit(); // alteração: grava síncrono
 
 
-            startActivity(new Intent(this, ProgressoActivity.class)); // alteração
+            int check = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                    .getInt("daily_goal_ml", -1);
+
+            Toast.makeText(this,
+                    "Meta salva? " + ok + " | meta = " + check + " ml",
+                    Toast.LENGTH_SHORT).show();
+
+
+            startActivity(new Intent(this, ProgressoActivity.class));
             finish();
 
         } catch (NumberFormatException e) {
