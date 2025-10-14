@@ -11,6 +11,9 @@ public class Task {
     private boolean concluida;
     private List<SubTask> subtarefas;
 
+    public Task() {
+
+    }
     public Task(String titulo, String notas){
         this.id = UUID.randomUUID().toString();
         this.titulo = titulo;

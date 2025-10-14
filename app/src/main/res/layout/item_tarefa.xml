@@ -7,15 +7,31 @@
     android:background="?attr/selectableItemBackground"
     android:minHeight="64dp">
 
-    <!-- Título da tarefa -->
-    <TextView
-        android:id="@+id/tvTitulo"
+    <!-- Linha título + checkbox -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:text="Título da tarefa" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="false"
+        android:layout_marginBottom="2dp">
+
+        <TextView
+            android:id="@+id/tvTitulo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:text="Título da tarefa" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/chkConcluida"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Concluir" />
+    </LinearLayout>
 
     <!-- Notas -->
     <TextView
@@ -27,8 +43,7 @@
         android:textSize="13sp"
         android:textColor="#555555"
         android:text="Notas da tarefa"
-        android:alpha="0.8"
-        android:layout_marginTop="2dp"/>
+        android:alpha="0.8"/>
 
     <!-- Subtarefas -->
     <TextView

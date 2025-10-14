@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskStorage {
     private static final String PREFS = "tasks_prefs";
@@ -30,5 +31,16 @@ public class TaskStorage {
         ArrayList<Task> list = getAll();
         list.add(t);
         sp.edit().putString(KEY, gson.toJson(list, listType)).apply();
+    }
+
+    // alteração: salva toda a lista atual (usado quando marca/desmarca tarefa)
+    public void saveAll(List<Task> list) {
+        if (list == null) list = new ArrayList<>(); // evita null pointer
+        sp.edit().putString(KEY, gson.toJson(list, listType)).apply();
+    }
+
+    // (opcional) limpar tudo, se quiser usar no futuro
+    public void clearAll() { // alteração opcional
+        sp.edit().putString(KEY, "[]").apply();
     }
 }
