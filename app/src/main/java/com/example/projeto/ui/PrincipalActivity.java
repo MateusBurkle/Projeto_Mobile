@@ -21,11 +21,15 @@ import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-// NOVO: Imports necessários para verificar a data
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.List;
+
+// NOVO: Imports corretos para Edge-to-Edge
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets; // <--- Esta é a correção
 
 public class PrincipalActivity extends AppCompatActivity {
 
@@ -37,6 +41,18 @@ public class PrincipalActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
+
+        // --- CORREÇÃO DO CÓDIGO EDGE-TO-EDGE ---
+        // Este bloco lida com o padding das barras de sistema (status e navegação)
+        // para que o layout não fique por baixo delas.
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.telaPrincipal), (v, windowInsets) -> {
+            // MUDANÇA: Usando 'androidx.core.graphics.Insets' para compatibilidade
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return windowInsets;
+        });
+        // --- FIM DA CORREÇÃO ---
+
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,39 +93,28 @@ public class PrincipalActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // NOVO: Verifica se o dia mudou ANTES de atualizar os resumos
         checkAndResetDailyProgress();
         atualizarResumos();
     }
 
     // --- MÉTODOS DE LÓGICA DO DASHBOARD ---
 
-    /**
-     * NOVO: Pega a data de hoje formatada (ex: "2025-10-28")
-     */
     private String getTodayDateString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(new Date());
     }
 
-    /**
-     * NOVO: Verifica se a data salva é diferente da data de hoje.
-     * Se for, zera o progresso da água.
-     */
     private void checkAndResetDailyProgress() {
         SharedPreferences sp = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String today = getTodayDateString();
-        String lastSaveDate = sp.getString("last_water_save_date", ""); // Pega a última data salva
+        String lastSaveDate = sp.getString("last_water_save_date", "");
 
         if (!today.equals(lastSaveDate)) {
-            // É UM NOVO DIA!
             SharedPreferences.Editor editor = sp.edit();
-            editor.putInt("daily_water_ml", 0); // Zera a contagem de água
-            editor.putString("last_water_save_date", today); // Salva a data de hoje
-            // (Futuramente, você pode zerar outras coisas aqui)
+            editor.putInt("daily_water_ml", 0);
+            editor.putString("last_water_save_date", today);
             editor.apply();
         }
-        // Se as datas forem iguais, não faz nada.
     }
 
     private void atualizarResumos() {
@@ -117,12 +122,23 @@ public class PrincipalActivity extends AppCompatActivity {
         atualizarResumoTarefas();
     }
 
+    // 1. SUBSTITUA A SUA FUNÇÃO ANTIGA POR ESTA
     private void atualizarResumoAgua() {
         SharedPreferences sp = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        // Agora, ele vai ler 0 se for um novo dia
-        int currentWater = sp.getInt("daily_water_ml", 0);
-        int goal = sp.getInt("daily_goal_ml", 2000);
 
+        // --- INÍCIO DA CORREÇÃO ---
+        // 1. Ler o peso salvo
+        int weight = sp.getInt("weight_kg", 0);
+
+        // 2. Calcular a meta (peso * 40)
+        int goal = (weight > 0) ? weight * 40 : 2000;
+
+        // 3. Salvar a nova meta (para que o resto do app veja)
+        sp.edit().putInt("daily_goal_ml", goal).apply();
+        // --- FIM DA CORREÇÃO ---
+
+        // 4. Ler o consumo atual e mostrar na tela
+        int currentWater = sp.getInt("daily_water_ml", 0);
         String resumoAgua = getString(R.string.water_summary_dashboard, currentWater, goal);
         tvResumoAgua.setText(resumoAgua);
     }
@@ -142,9 +158,7 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Método para abrir o BottomSheet de Água (com lógica de data adicionada)
-     */
+    // 2. SUBSTITUA TAMBÉM ESTA FUNÇÃO
     private void abrirBottomSheetAgua() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.activity_add_agua, null);
@@ -153,10 +167,12 @@ public class PrincipalActivity extends AppCompatActivity {
         TextView tvMeta = view.findViewById(R.id.tvMetaDiaria);
 
         SharedPreferences sp = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        int weight = sp.getInt("weight_kg", 0);
-        int goal = (weight > 0) ? weight * 40 : 2000;
-        sp.edit().putInt("daily_goal_ml", goal).apply();
+
+        // --- INÍCIO DA CORREÇÃO ---
+        // Apenas lê a meta que já foi calculada e salva pela função "atualizarResumoAgua"
+        int goal = sp.getInt("daily_goal_ml", 2000);
         tvMeta.setText("Meta diária: " + goal + " ml");
+        // --- FIM DA CORREÇÃO ---
 
 
         RadioGroup rgUnidade = view.findViewById(R.id.rgUnidade);
@@ -205,13 +221,10 @@ public class PrincipalActivity extends AppCompatActivity {
             int currentWater = sp.getInt("daily_water_ml", 0);
             int newTotalWater = currentWater + mlAdicionados;
 
-            // --- MUDANÇA PRINCIPAL ---
-            // Agora, salvamos o total E a data de hoje.
             SharedPreferences.Editor editor = sp.edit();
             editor.putInt("daily_water_ml", newTotalWater);
-            editor.putString("last_water_save_date", getTodayDateString()); // Salva a data!
+            editor.putString("last_water_save_date", getTodayDateString());
             editor.apply();
-            // --- FIM DA MUDANÇA ---
 
             Toast.makeText(this, "Adicionado: " + mlAdicionados + " mL", Toast.LENGTH_SHORT).show();
             dialog.dismiss();

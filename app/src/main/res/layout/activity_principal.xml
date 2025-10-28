@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
+    android:fitsSystemWindows="true"
     tools:context=".ui.PrincipalActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -20,7 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="@string/welcome"
-            app:titleTextAppearance="?attr/textAppearanceHeadlineSmall" />
+            app:titleTextAppearance="?attr/textAppearanceHeadlineSmall"
+            app:titleTextColor="?attr/colorPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -50,12 +52,11 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardAgua"
-                    style="?attr/materialCardViewFilledStyle"
+                    style="@style/Widget.HidraMeta.DashboardCard"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardBackgroundColor="?attr/colorPrimaryContainer">
+                    android:layout_marginEnd="8dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -80,32 +81,31 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardTarefas"
-                    style="?attr/materialCardViewFilledStyle"
+                    style="@style/Widget.HidraMeta.DashboardCard"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    app:cardBackgroundColor="?attr/colorSecondaryContainer">
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    app:cardBackgroundColor="?attr/colorSecondaryContainer"> <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tarefas"
-                            android:textAppearance="?attr/textAppearanceTitleSmall"
-                            android:textColor="?attr/colorOnSecondaryContainer"/>
-                        <TextView
-                            android:id="@+id/tvResumoTarefas"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSecondaryContainer"
-                            tools:text="3 pendentes"/>
-                    </LinearLayout>
+                        android:text="Tarefas"
+                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                        android:textColor="?attr/colorOnSecondaryContainer"/>
+                    <TextView
+                        android:id="@+id/tvResumoTarefas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSecondaryContainer"
+                        tools:text="3 pendentes"/>
+                </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
@@ -117,34 +117,27 @@
                 android:layout_marginBottom="12dp"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAdicionarTarefa"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/add_task"
-                android:paddingVertical="12dp"
-                app:icon="@drawable/ic_check_24"
-                style="@style/Widget.Material3.Button.TonalButton"/>
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVerListaTarefas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:text="@string/see_task_list"
-                android:paddingVertical="12dp"
-                app:icon="@drawable/ic_check_24" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnProgresso"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:paddingVertical="12dp"
-                android:text="@string/see_progress"
-                app:icon="@drawable/ic_check_24"/>
-
-        </LinearLayout>
+                app:icon="@drawable/ic_check_24"
+                style="@style/Widget.Material3.Button" /> <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAdicionarTarefa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_task"
+            android:layout_marginTop="12dp"
+            app:icon="@drawable/ic_check_24"
+            style="@style/Widget.Material3.Button.TonalButton" /> <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnProgresso"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:paddingVertical="12dp"
+            android:text="@string/see_progress"
+            app:icon="@drawable/ic_check_24"/> </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -154,9 +147,9 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:text="@string/add_water_fab"
-        android:textColor="?attr/colorOnPrimaryContainer"
-        app:backgroundTint="?attr/colorPrimaryContainer"
         app:icon="@drawable/icone_garrafa_preta"
+        app:backgroundTint="?attr/colorPrimaryContainer"
+        android:textColor="?attr/colorOnPrimaryContainer"
         app:iconTint="?attr/colorOnPrimaryContainer" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
