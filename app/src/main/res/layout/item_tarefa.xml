@@ -1,58 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:background="?attr/selectableItemBackground"
-    android:minHeight="64dp">
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:checkable="true"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="12dp">
 
-    <!-- Linha título + checkbox -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:baselineAligned="false"
-        android:layout_marginBottom="2dp">
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:minHeight="64dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:id="@+id/tvTitulo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface" android:textSize="16sp"
+                android:text="Título da tarefa" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/chkConcluida"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Concluir" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tvTitulo"
-            android:layout_width="0dp"
+            android:id="@+id/tvNotas"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:text="Título da tarefa" />
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textSize="13sp"
+            android:textColor="?attr/colorOnSurfaceVariant" android:text="Notas da tarefa"
+            android:alpha="0.8"/>
 
-        <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/chkConcluida"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="Concluir" />
+        <TextView
+            android:id="@+id/tvMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="?attr/colorOnSurfaceVariant" android:alpha="0.7"
+            android:layout_marginTop="4dp"
+            android:text="0 subtarefas" />
     </LinearLayout>
 
-    <!-- Notas -->
-    <TextView
-        android:id="@+id/tvNotas"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:textSize="13sp"
-        android:textColor="#555555"
-        android:text="Notas da tarefa"
-        android:alpha="0.8"/>
-
-    <!-- Subtarefas -->
-    <TextView
-        android:id="@+id/tvMeta"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="#777777"
-        android:alpha="0.7"
-        android:layout_marginTop="4dp"
-        android:text="0 subtarefas" />
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

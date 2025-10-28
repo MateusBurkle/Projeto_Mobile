@@ -1,6 +1,7 @@
 <resources>
+    <string name="app_name">HidraMeta</string>
+
     -- Tela Principal --
-    <string name="app_name">Projeto</string>
     <string name="welcome">Seja bem-vindo!</string>
     <string name="add_task">Adicionar Tarefa</string>
     <string name="see_task_list">Ver lista de tarefas</string>
@@ -15,9 +16,16 @@
     <string name="hint_peso">Digite seu peso (kg)</string>
     <string name="btn_cadastrar">Cadastrar</string>
 
-    <!-- Mensagens de erro -->
     <string name="error_nome_obrigatorio">O nome é obrigatório</string>
     <string name="error_email_obrigatorio">O e-mail é obrigatório</string>
     <string name="error_senha_obrigatoria">A senha é obrigatória</string>
     <string name="error_peso_obrigatorio">O peso é obrigatório</string>
+
+    <string name="progress_title">Seu Progresso</string>
+    <string name="water_progress_today">Progresso de Hoje</string>
+    <string name="water_summary_format">Hoje: %1$d ml / %2$d ml</string>
+    <string name="water_percentage_format">%1$d%%</string>
+
+    <string name="water_summary_dashboard">%1$d / %2$d ml</string>
+    <string name="task_summary_dashboard">%1$d pendentes</string>
 </resources>

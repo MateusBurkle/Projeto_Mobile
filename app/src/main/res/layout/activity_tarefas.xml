@@ -1,111 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/telaTarefas"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:background="?attr/colorSurface"
+    tools:context=".ui.TarefasActivity">
 
-    <!-- AppBar -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topAppBar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:backgroundTint="?attr/colorSurface"
-        app:menu="@menu/menu_tarefa"
-        app:navigationIcon="@drawable/arrow_back_24"
-        app:title="Nova tarefa" />
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Nova Tarefa"
+            app:navigationIcon="@drawable/arrow_back_24"
+            app:menu="@menu/menu_tarefa" /> </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:fillViewport="true"
-        android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Título -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilTitulo"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Título da tarefa"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="2dp">
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTitulo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="textCapSentences" />
+                    android:inputType="textCapSentences"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Notas -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilNotas"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:hint="Notas (opcional)"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="2dp">
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNotas"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine|textCapSentences"
-                    android:maxLines="6"
-                    android:minLines="2" />
+                    android:minLines="3"
+                    android:gravity="top"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Cabeçalho Subtarefas -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:text="Subtarefas"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"/>
 
-                <TextView
-                    android:id="@+id/tvSubtarefasTitulo"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Subtarefas"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAdicionarSubtarefa"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+ Subtarefa" />
-            </LinearLayout>
-
-            <!-- Lista de Subtarefas -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvSubtarefas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false" />
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_tarefa"
+                tools:itemCount="2"/>
 
-            <!-- Espaço final para não ficar escondido pelo FAB -->
-            <Space
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilNovaSubtarefa"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Adicionar subtarefa"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etNovaSubtarefa"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageButton
+                    android:id="@+id/btnAddSubtarefa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_check_24"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="Adicionar subtarefa"/>
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

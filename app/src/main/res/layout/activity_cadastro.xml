@@ -4,109 +4,104 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    tools:context=".ui.CadastroActivity"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?attr/colorSurface"> <LinearLayout
+    android:id="@+id/telaCadastro"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center_horizontal">
 
-    <LinearLayout
-        android:id="@+id/telaCadastro"
+    <TextView
+        android:id="@+id/textIntro"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="32dp"
-        android:gravity="center_horizontal">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/text_intro"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="17sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textIntro"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutNome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editNome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:layout_marginTop="20dp"
-            android:gravity="center"
-            android:text="@string/text_intro"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:autofillHints="PersonName"
+            android:hint="@string/hint_nome"
+            android:inputType="textPersonName"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Nome -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutNome"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:autofillHints="emailAddress"
+            android:hint="@string/hint_email"
+            android:inputType="textEmailAddress"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editNome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autofillHints="PersonName"
-                android:hint="@string/hint_nome"
-                android:inputType="textPersonName"
-                android:minHeight="48dp" />
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutSenha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:passwordToggleEnabled="true"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-        <!-- Campo Email -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutEmail"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editSenha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:autofillHints="password"
+            android:hint="@string/hint_senha"
+            android:inputType="textPassword"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editEmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autofillHints="emailAddress"
-                android:hint="@string/hint_email"
-                android:inputType="textEmailAddress"
-                android:minHeight="48dp" />
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutPeso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-        <!-- Campo Senha -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutSenha"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editPeso"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:passwordToggleEnabled="true"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:autofillHints="BodyWeight"
+            android:hint="@string/hint_peso"
+            android:inputType="numberDecimal"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editSenha"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autofillHints="password"
-                android:hint="@string/hint_senha"
-                android:inputType="textPassword"
-                android:minHeight="48dp" />
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCadastrar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:paddingVertical="12dp"
+        android:text="@string/btn_cadastrar"
+        app:cornerRadius="8dp" />
 
-        <!-- Campo Peso -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutPeso"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editPeso"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autofillHints="BodyWeight"
-                android:hint="@string/hint_peso"
-                android:inputType="numberDecimal"
-                android:minHeight="48dp" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Botão -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCadastrar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:paddingVertical="12dp"
-            android:text="@string/btn_cadastrar"
-            app:cornerRadius="8dp" />
-
-    </LinearLayout>
+</LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
