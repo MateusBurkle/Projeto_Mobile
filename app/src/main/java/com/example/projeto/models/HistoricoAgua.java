@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "historico_agua")
 public class HistoricoAgua {
 
-    // Define a 'data' (ex: "2025-10-29") como a chave primária.
+    // Define a 'data' (ex: "2025-10-29") como a chave primária.teste
     // Isso garante que só podemos ter um registro por dia.
     @PrimaryKey
     @NonNull
