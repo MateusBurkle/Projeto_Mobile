@@ -17,6 +17,7 @@ android {
     }
 
     buildTypes {
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -27,6 +28,7 @@ android {
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
+
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
@@ -41,9 +43,19 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-   // Biblioteca para montar o gráfico de barra usando MPAndroidChart
+    // Biblioteca para montar o gráfico de barra usando MPAndroidChart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     // Biblioteca que transforma as tarefas em JSON
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // --- DEPENDÊNCIAS DO BANCO DE DADOS (ROOM) ---
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-guava:$room_version")
+
+    // --- ESTA É A LINHA QUE FALTAVA (CORREÇÃO) ---
+    implementation("com.google.guava:guava:33.0.0-android")
+    // --- FIM DA CORREÇÃO ---
 }
