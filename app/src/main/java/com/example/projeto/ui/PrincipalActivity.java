@@ -6,8 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.Menu; // <-- IMPORT ADICIONADO
-import android.view.MenuItem; // <-- IMPORT ADICIONADO
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -18,7 +18,7 @@ import com.example.projeto.models.HistoricoAgua;
 import com.example.projeto.models.Task;
 import com.example.projeto.storage.AppDatabase;
 import com.example.projeto.storage.HistoricoAguaDao;
-import com.example.projeto.storage.SessionManager; // <-- IMPORT ADICIONADO
+import com.example.projeto.storage.SessionManager;
 import com.example.projeto.storage.TaskStorage;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -46,21 +46,22 @@ public class PrincipalActivity extends AppCompatActivity {
     private TextView tvResumoTarefas;
     private TaskStorage taskStorage;
 
-    // --- MUDANÇA: Variáveis do Banco de Dados e Sessão ---
+    // --- Variáveis do Banco de Dados e Sessão ---
     private HistoricoAguaDao historicoAguaDao;
     private ExecutorService databaseExecutor;
     private int metaDiariaGlobal = 2000;
-    private SessionManager session; // <-- VARIÁVEL ADICIONADA
-    // --- FIM DA MUDANÇA ---
+    private SessionManager session;
+    // --- FIM ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
-        // --- MUDANÇA: Instanciar SessionManager ---
+        // --- Instanciar SessionManager ---
         session = new SessionManager(getApplicationContext());
-        // --- FIM DA MUDANÇA ---
+        session.checkLogin(); // Garante que o usuário esteja logado
+        // --- FIM ---
 
         databaseExecutor = Executors.newSingleThreadExecutor();
         historicoAguaDao = AppDatabase.getInstance(this).historicoAguaDao();
@@ -75,7 +76,7 @@ public class PrincipalActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // --- MUDANÇA: Inflar o menu de Logout ---
+        // --- Inflar o menu de Logout ---
         toolbar.inflateMenu(R.menu.menu_principal);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_logout) {
@@ -85,7 +86,7 @@ public class PrincipalActivity extends AppCompatActivity {
             }
             return false;
         });
-        // --- FIM DA MUDANÇA ---
+        // --- FIM ---
 
         taskStorage = new TaskStorage(this);
         tvResumoAgua = findViewById(R.id.tvResumoAgua);
@@ -123,8 +124,7 @@ public class PrincipalActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Adicionamos o checkLogin aqui por segurança
-        session.checkLogin();
+        // A checagem de login já foi para o onCreate
         atualizarResumos();
     }
 
@@ -165,7 +165,7 @@ public class PrincipalActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, ContextCompat.getMainExecutor(this)); // Executa o listener na thread principal
+        }, ContextCompat.getMainExecutor(this));
     }
 
     private void atualizarResumoTarefas() {
@@ -206,10 +206,14 @@ public class PrincipalActivity extends AppCompatActivity {
 
         rgUnidade.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbMl) {
+                // --- CORREÇÃO AQUI ---
                 tilQtd.setHint("Quantidade (mL)");
+                // --- FIM DA CORREÇÃO ---
                 tilTamanhoCopo.setVisibility(View.GONE);
             } else {
+                // --- CORREÇÃO AQUI ---
                 tilQtd.setHint("Quantidade (copos)");
+                // --- FIM DA CORREÇÃO ---
                 tilTamanhoCopo.setVisibility(View.VISIBLE);
             }
         });
