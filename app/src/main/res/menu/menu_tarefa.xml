@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/action_salvar"
+        android:id="@+id/action_save"
+        android:title="Salvar"
         android:icon="@drawable/ic_check_24"
-        android:title="Salvar Tarefa"
-        android:contentDescription="Salvar Tarefa"
         app:showAsAction="ifRoom" />
+
 </menu>

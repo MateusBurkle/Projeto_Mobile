@@ -15,158 +15,187 @@ import com.example.projeto.R;
 import com.example.projeto.adapters.SubTarefasAdapter;
 import com.example.projeto.models.SubTask;
 import com.example.projeto.models.Task;
-import com.example.projeto.storage.TaskStorage;
+import com.example.projeto.storage.AppDatabase;
+import com.example.projeto.storage.TaskDao;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TarefasActivity extends AppCompatActivity {
 
-    // Storage
-    private TaskStorage taskStorage;
-
-    // Views
-    private MaterialToolbar toolbar;
-    private TextInputLayout tilTitulo;
-    private TextInputEditText etTitulo;
-    private TextInputEditText etNotas;
+    private TextInputEditText editNomeTarefa;
+    private TextInputEditText editNotas; // Adicionado para o novo XML
+    private TextInputEditText editNovaSubtarefa; // Adicionado para o novo XML
+    private ImageButton btnAddSubtarefa; // Adicionado para o novo XML
     private RecyclerView rvSubtarefas;
-    private TextInputEditText etNovaSubtarefa;
-    private ImageButton btnAddSubtarefa;
+    private SubTarefasAdapter adapter;
 
-    // Lista de Subtarefas
-    private SubTarefasAdapter subTarefasAdapter;
-    private List<SubTask> subtasksList;
+    private TaskDao taskDao;
+    private ExecutorService databaseExecutor;
+    private Task currentTask;
+    private boolean isEditMode = false;
+    private long taskId = -1L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tarefas);
 
-        // 1. Encontrar todas as Views
-        toolbar = findViewById(R.id.toolbar);
-        tilTitulo = findViewById(R.id.tilTitulo);
-        etTitulo = findViewById(R.id.etTitulo);
-        etNotas = findViewById(R.id.etNotas);
-        rvSubtarefas = findViewById(R.id.rvSubtarefas);
-        etNovaSubtarefa = findViewById(R.id.etNovaSubtarefa);
-        btnAddSubtarefa = findViewById(R.id.btnAddSubtarefa);
-
-        // 2. Configurar a Toolbar
-        setupToolbar();
-
-        // 3. Configurar Storage, Adapter e RecyclerView
-        setupStorageAndAdapter();
-
-        // 4. Configurar o clique do botão "Adicionar Subtarefa"
-        setupClickListeners();
-    }
-
-    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
-        // Lidar com o clique no botão "voltar"
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-    }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // O título da toolbar é pego do XML agora
 
-    private void setupStorageAndAdapter() {
-        taskStorage = new TaskStorage(this);
-        subtasksList = new ArrayList<>(); // Inicializa a lista de subtarefas
+        databaseExecutor = Executors.newSingleThreadExecutor();
+        taskDao = AppDatabase.getInstance(this).taskDao();
 
-        subTarefasAdapter = new SubTarefasAdapter(subtasksList);
+        // --- MUDANÇA DA CORREÇÃO AQUI ---
+        editNomeTarefa = findViewById(R.id.etTitulo); // ID corrigido (era editNomeTarefa)
+        editNotas = findViewById(R.id.etNotas); // ID do novo XML
+        rvSubtarefas = findViewById(R.id.rvSubtarefas);
+        editNovaSubtarefa = findViewById(R.id.etNovaSubtarefa); // ID do novo XML
+        btnAddSubtarefa = findViewById(R.id.btnAddSubtarefa); // ID do novo XML
+        // --- FIM DA CORREÇÃO ---
 
-        // Configura o que acontece quando o usuário clica em "X" (deletar) em uma subtarefa
-        subTarefasAdapter.setOnDeleteClick(position -> {
-            subtasksList.remove(position);
-            subTarefasAdapter.notifyItemRemoved(position);
-            // Notifica o adapter para re-calcular as posições
-            subTarefasAdapter.notifyItemRangeChanged(position, subtasksList.size());
-        });
+        // --- LÓGICA ANTIGA REMOVIDA (FAB e Dialog) ---
+        // FloatingActionButton fabAddSubtarefa = findViewById(R.id.fabAddSubtarefa);
+        // fabAddSubtarefa.setOnClickListener(v -> showAddSubtaskDialog());
+        // --- FIM DA LÓGICA ANTIGA ---
 
-        // Configura o que acontece quando o usuário marca/desmarca a checkbox da subtarefa
-        subTarefasAdapter.setOnToggleClick((subTask, isChecked) -> {
-            subTask.setConcluida(isChecked);
-            // A lista já tem a referência, então o objeto é atualizado
-        });
-
-        rvSubtarefas.setLayoutManager(new LinearLayoutManager(this));
-        rvSubtarefas.setAdapter(subTarefasAdapter);
-    }
-
-    private void setupClickListeners() {
+        // --- NOVA LÓGICA DE ADICIONAR SUBTAREFA (Inline) ---
         btnAddSubtarefa.setOnClickListener(v -> {
-            String subtaskTitle = etNovaSubtarefa.getText() != null ? etNovaSubtarefa.getText().toString().trim() : "";
-            if (!subtaskTitle.isEmpty()) {
-                // Cria a nova subtarefa
-                SubTask newSubTask = new SubTask(subtaskTitle);
-
-                // Adiciona na lista
-                subtasksList.add(newSubTask);
-
-                // Notifica o adapter que um novo item foi inserido no final
-                subTarefasAdapter.notifyItemInserted(subtasksList.size() - 1);
-
-                // Limpa o campo de texto
-                etNovaSubtarefa.setText("");
+            String nomeSubtarefa = editNovaSubtarefa.getText().toString().trim();
+            if (!nomeSubtarefa.isEmpty()) {
+                currentTask.addSubtask(new SubTask(nomeSubtarefa));
+                adapter.notifyItemInserted(currentTask.getSubtasks().size() - 1);
+                editNovaSubtarefa.setText(""); // Limpa o campo
             }
         });
+        // --- FIM DA NOVA LÓGICA ---
+
+        taskId = getIntent().getLongExtra("TASK_ID", -1L);
+        isEditMode = (taskId != -1L);
+
+        if (isEditMode) {
+            getSupportActionBar().setTitle("Editar Tarefa");
+            loadTaskData();
+        } else {
+            getSupportActionBar().setTitle("Criar Tarefa");
+            currentTask = new Task("");
+            setupRecyclerView();
+        }
     }
 
-    // --- Lógica do Menu (Salvar) ---
+    private void loadTaskData() {
+        databaseExecutor.execute(() -> {
+            currentTask = taskDao.getTaskById(taskId);
+
+            runOnUiThread(() -> {
+                if (currentTask == null) {
+                    currentTask = new Task("");
+                    isEditMode = false;
+                    getSupportActionBar().setTitle("Criar Tarefa");
+                }
+                editNomeTarefa.setText(currentTask.getNome());
+                // NOTA: O seu modelo Task.java não tem campo "notas"
+                // Para carregar, você precisaria adicionar "String notas" no Task.java
+                // editNotas.setText(currentTask.getNotas());
+                setupRecyclerView();
+            });
+        });
+    }
+
+    private void setupRecyclerView() {
+        if (currentTask.getSubtasks() == null) {
+            currentTask.setSubtasks(new ArrayList<>());
+        }
+        adapter = new SubTarefasAdapter(
+                currentTask.getSubtasks(),
+                // OnToggleClick
+                position -> {
+                    SubTask subtask = currentTask.getSubtasks().get(position);
+                    subtask.setDone(!subtask.getDone());
+                    adapter.notifyItemChanged(position);
+                },
+                // OnDeleteClick
+                position -> {
+                    currentTask.removeSubtask(position);
+                    adapter.notifyItemRemoved(position);
+                    adapter.notifyItemRangeChanged(position, currentTask.getSubtasks().size());
+                }
+        );
+        rvSubtarefas.setLayoutManager(new LinearLayoutManager(this));
+        rvSubtarefas.setAdapter(adapter);
+    }
+
+    // --- MÉTODO ANTIGO REMOVIDO ---
+    // O "showAddSubtaskDialog" não é mais usado, pois a adição
+    // é feita direto na tela (inline)
+    /*
+    private void showAddSubtaskDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_subtarefa, null);
+        EditText editNomeSubtarefa = view.findViewById(R.id.etNomeSubtarefa);
+
+        builder.setView(view)
+                .setTitle("Nova Subtarefa")
+                .setPositiveButton("Adicionar", (dialog, which) -> {
+                    String nome = editNomeSubtarefa.getText().toString().trim();
+                    if (!nome.isEmpty()) {
+                        currentTask.addSubtask(new SubTask(nome));
+                        adapter.notifyItemInserted(currentTask.getSubtasks().size() - 1);
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+    */
+    // --- FIM DO MÉTODO REMOVIDO ---
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Infla o menu 'menu_tarefa.xml' (com o botão de salvar)
         getMenuInflater().inflate(R.menu.menu_tarefa, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // Verifica se o item clicado é o 'action_salvar'
-        if (item.getItemId() == R.id.action_salvar) {
-            salvarTarefa();
+        int id = item.getItemId();
+        if (id == R.id.action_save) {
+            saveTask();
+            return true;
+        } else if (id == android.R.id.home) {
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void salvarTarefa() {
-        String titulo = etTitulo.getText() != null ? etTitulo.getText().toString().trim() : "";
-        String notas = etNotas.getText() != null ? etNotas.getText().toString().trim() : "";
-
-        // 1. Validação: Verifica se o título está vazio
-        if (titulo.isEmpty()) {
-            tilTitulo.setError("O título é obrigatório");
+    private void saveTask() {
+        String nomeTarefa = editNomeTarefa.getText().toString().trim();
+        if (nomeTarefa.isEmpty()) {
+            Toast.makeText(this, "Por favor, dê um nome à tarefa.", Toast.LENGTH_SHORT).show();
             return;
-        } else {
-            tilTitulo.setError(null); // Limpa o erro se estiver preenchido
         }
 
-        // 2. Criar o objeto Task
-        Task novaTarefa = new Task(titulo, notas);
+        currentTask.setNome(nomeTarefa);
+        // NOTA: O seu modelo Task.java não tem campo "notas"
+        // Para salvar, você precisaria adicionar "String notas" no Task.java
+        // currentTask.setNotas(editNotas.getText().toString().trim());
 
-        // 3. Adicionar a lista de subtarefas que criamos
-        novaTarefa.setSubtarefas(subtasksList);
+        databaseExecutor.execute(() -> {
+            if (isEditMode) {
+                taskDao.update(currentTask);
+            } else {
+                taskDao.insert(currentTask);
+            }
 
-        // 4. Salvar a tarefa no Storage
-        // O TaskStorage.java salva a lista inteira, então precisamos
-        // buscar a lista atual, adicionar a nova tarefa e salvar tudo.
-        List<Task> allTasks = taskStorage.getAll();
-        if (allTasks == null) {
-            allTasks = new ArrayList<>();
-        }
-        allTasks.add(novaTarefa);
-        taskStorage.saveAll(allTasks);
+            runOnUiThread(this::finish);
+        });
 
-        // 5. Mostrar feedback e fechar a tela
-        Toast.makeText(this, "Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show();
-        finish(); // Fecha a TarefasActivity e volta para a tela anterior
+        Toast.makeText(this, "Tarefa salva!", Toast.LENGTH_SHORT).show();
     }
 }
