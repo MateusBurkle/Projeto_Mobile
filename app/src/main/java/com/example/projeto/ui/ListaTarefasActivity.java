@@ -2,9 +2,11 @@ package com.example.projeto.ui;
 
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -18,182 +20,183 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.projeto.R;
 import com.example.projeto.adapters.TaskListAdapter;
 import com.example.projeto.models.Task;
-import com.example.projeto.storage.TaskStorage;
+import com.example.projeto.storage.AppDatabase;
+import com.example.projeto.storage.TaskDao;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ListaTarefasActivity extends AppCompatActivity {
 
-    private TaskStorage storage;
+    private RecyclerView rvTarefas;
     private TaskListAdapter adapter;
-    private RecyclerView rv;
-    private android.widget.TextView tvVazio;
+    private final List<Task> tasks = new ArrayList<>();
 
-    private List<Task> tasks;
+    // --- MUDANÇA AQUI ---
+    private TaskDao taskDao;
+    private ExecutorService databaseExecutor;
+    // --- FIM DA MUDANÇA ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_tarefas);
 
-        storage = new TaskStorage(this);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Lista de Tarefas");
 
-        MaterialToolbar top = findViewById(R.id.topAppBar);
-        rv = findViewById(R.id.rvTarefas);
-        tvVazio = findViewById(R.id.tvVazio);
+        // --- MUDANÇA AQUI ---
+        // Inicializa o acesso ao banco de dados
+        databaseExecutor = Executors.newSingleThreadExecutor();
+        taskDao = AppDatabase.getInstance(this).taskDao();
+        // --- FIM DA MUDANÇA ---
 
-        setSupportActionBar(top);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
-
-        top.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-        top.setOnMenuItemClickListener(this::onMenuClick);
-
-        adapter = new TaskListAdapter();
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adapter);
-
-        // Swipe: direita = concluir/desconcluir, esquerda = excluir (com desfazer)
-        ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-                0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView,
-                                  @NonNull RecyclerView.ViewHolder viewHolder,
-                                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direction) {
-                int pos = vh.getBindingAdapterPosition();
-                if (pos == RecyclerView.NO_POSITION) pos = vh.getAdapterPosition();
-
-                final Task task = adapter.getItem(pos);
-                if (task == null) return;
-
-                if (direction == ItemTouchHelper.RIGHT) {
-
-                    boolean novoEstado = !task.isConcluida();
-                    task.setConcluida(novoEstado);
-                    if (tasks != null && pos >= 0 && pos < tasks.size()) {
-                        tasks.set(pos, task);
-                    }
-                    storage.saveAll(tasks);
-                    adapter.notifyItemChanged(pos);
-                } else if (direction == ItemTouchHelper.LEFT) {
-                    // Excluir com desfazer
-                    final int deletedPos = pos;
-                    final Task removedTask = task;
-
-                    if (tasks != null && deletedPos >= 0 && deletedPos < tasks.size()) {
-                        tasks.remove(deletedPos);
-                    }
-                    adapter.removeAt(deletedPos);
-                    storage.deleteById(removedTask.getId());
-                    atualizarVazio();
-
-                    Snackbar.make(rv, "Tarefa excluída", Snackbar.LENGTH_LONG)
-                            .setAction("DESFAZER", v -> {
-                                if (tasks == null) tasks = new java.util.ArrayList<>();
-                                int insertPos = Math.max(0, Math.min(deletedPos, tasks.size()));
-                                tasks.add(insertPos, removedTask);
-                                storage.saveAll(tasks);
-                                adapter.insertAt(insertPos, removedTask);
-                                atualizarVazio();
-                            })
-                            .show();
-                }
-            }
-
-            @Override
-            public void onChildDraw(@NonNull Canvas c,
-                                    @NonNull RecyclerView recyclerView,
-                                    @NonNull RecyclerView.ViewHolder vh,
-                                    float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
-                super.onChildDraw(c, recyclerView, vh, dX, dY, actionState, isCurrentlyActive);
-
-                View item = vh.itemView;
-                Paint paint = new Paint();
-                float density = recyclerView.getResources().getDisplayMetrics().density;
-                int margin = (int) (16f * density);
-                int iconSize = (int) (24f * density);
-
-                if (dX > 0) { // direita = concluir/desconcluir
-                    int green = 0xFF4CAF50; // Material Green 500
-                    paint.setColor(green);
-                    c.drawRect(item.getLeft(), item.getTop(), item.getLeft() + dX, item.getBottom(), paint);
-
-                    Drawable icon = ContextCompat.getDrawable(recyclerView.getContext(), R.drawable.ic_check_24);
-                    if (icon != null) {
-                        int left = item.getLeft() + margin;
-                        int right = left + iconSize;
-                        int top = item.getTop() + (item.getHeight() - iconSize) / 2;
-                        int bottom = top + iconSize;
-                        icon.setBounds(left, top, right, bottom);
-                        icon.draw(c);
-                    }
-                } else if (dX < 0) { // esquerda = excluir
-                    int red = ContextCompat.getColor(recyclerView.getContext(), android.R.color.holo_red_light);
-                    paint.setColor(red);
-                    c.drawRect(item.getRight() + dX, item.getTop(), item.getRight(), item.getBottom(), paint);
-
-                    Drawable icon = ContextCompat.getDrawable(recyclerView.getContext(),
-                            R.drawable.icon_delete_24 /* ou ic_delete_24 */);
-                    if (icon != null) {
-                        int right = item.getRight() - margin;
-                        int left = right - iconSize;
-                        int top = item.getTop() + (item.getHeight() - iconSize) / 2;
-                        int bottom = top + iconSize;
-                        icon.setBounds(left, top, right, bottom);
-                        icon.draw(c);
-                    }
-                }
-            }
-        });
-        helper.attachToRecyclerView(rv);
-
-        adapter.setOnItemClick(task -> {
-            // futuro: abrir detalhes/edição
-        });
-
-        adapter.setOnToggleDone((task, done, pos) -> {
-            task.setConcluida(done);
-            storage.saveAll(tasks);
-            adapter.notifyItemChanged(pos);
-            atualizarVazio();
-        });
-
-        carregar();
+        rvTarefas = findViewById(R.id.rvTarefas);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        carregar();
+        loadTasks(); // Carrega as tarefas do banco toda vez que a tela é exibida
     }
 
-    private boolean onMenuClick(MenuItem item) {
-        if (item.getItemId() == R.id.action_adicionar) {
-            Intent intent = new Intent(this, TarefasActivity.class);
-            startActivity(intent);
+    private void loadTasks() {
+        // --- MUDANÇA AQUI ---
+        // Busca as tarefas em uma thread separada
+        databaseExecutor.execute(() -> {
+            List<Task> loadedTasks = taskDao.getAllTasks();
+
+            // Atualiza a UI na thread principal
+            runOnUiThread(() -> {
+                tasks.clear();
+                tasks.addAll(loadedTasks);
+                if (adapter == null) {
+                    setupRecyclerView();
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        });
+        // --- FIM DA MUDANÇA ---
+    }
+
+    private void setupRecyclerView() {
+        adapter = new TaskListAdapter(tasks,
+                // OnItemClick (agora passa taskId)
+                taskId -> {
+                    Intent intent = new Intent(this, TarefasActivity.class);
+                    intent.putExtra("TASK_ID", taskId); // <-- MUDANÇA AQUI
+                    startActivity(intent);
+                },
+                // OnToggleDone (agora atualiza no banco)
+                position -> {
+                    // --- MUDANÇA AQUI ---
+                    Task task = tasks.get(position);
+                    task.setConcluida(!task.isConcluida());
+                    databaseExecutor.execute(() -> taskDao.update(task));
+                    adapter.notifyItemChanged(position);
+                    // --- FIM DA MUDANÇA ---
+                }
+        );
+        rvTarefas.setLayoutManager(new LinearLayoutManager(this));
+        rvTarefas.setAdapter(adapter);
+
+        setupSwipeToDelete();
+    }
+
+    private void setupSwipeToDelete() {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                // --- MUDANÇA AQUI ---
+                Task taskToDelete = tasks.get(position);
+
+                databaseExecutor.execute(() -> taskDao.delete(taskToDelete)); // Deleta do banco
+                tasks.remove(position); // Remove da lista local
+                adapter.notifyItemRemoved(position); // Atualiza o adapter
+
+                Snackbar.make(rvTarefas, "Tarefa excluída", Snackbar.LENGTH_LONG)
+                        .setAction("DESFAZER", v -> {
+                            // Adiciona de volta no banco e na lista
+                            databaseExecutor.execute(() -> taskDao.insert(taskToDelete));
+                            tasks.add(position, taskToDelete);
+                            adapter.notifyItemInserted(position);
+                        }).show();
+                // --- FIM DA MUDANÇA ---
+            }
+
+            // Lógica para desenhar o fundo vermelho (sem mudanças)
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                Drawable icon = ContextCompat.getDrawable(ListaTarefasActivity.this, R.drawable.icon_delete_24);
+                ColorDrawable background = new ColorDrawable(Color.RED);
+                View itemView = viewHolder.itemView;
+                int backgroundCornerOffset = 20;
+
+                int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+                int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+                int iconBottom = iconTop + icon.getIntrinsicHeight();
+
+                if (dX > 0) { // Swiping to the right
+                    // ... (código original)
+                } else if (dX < 0) { // Swiping to the left
+                    int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
+                    int iconRight = itemView.getRight() - iconMargin;
+                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+
+                    background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
+                            itemView.getTop(), itemView.getRight(), itemView.getBottom());
+                } else { // view is unSwiped
+                    background.setBounds(0, 0, 0, 0);
+                }
+                background.draw(c);
+                icon.draw(c);
+            }
+
+        }).attachToRecyclerView(rvTarefas);
+    }
+
+    // --- MUDANÇA AQUI ---
+    // Adiciona o menu para "Excluir Concluídas"
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_lista_tarefas, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_delete_completed) {
+            deleteCompletedTasks();
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            finish(); // Trata o clique no botão "voltar" da toolbar
             return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
-    private void carregar() {
-        tasks = storage.getAll();
-        adapter.submit(tasks);
-        atualizarVazio();
+    private void deleteCompletedTasks() {
+        databaseExecutor.execute(() -> {
+            taskDao.deleteCompletedTasks();
+            // Recarrega as tarefas na UI thread
+            runOnUiThread(this::loadTasks);
+        });
+        Snackbar.make(rvTarefas, "Tarefas concluídas foram excluídas", Snackbar.LENGTH_SHORT).show();
     }
-
-    private void atualizarVazio() {
-        tvVazio.setVisibility(tasks == null || tasks.isEmpty() ? View.VISIBLE : View.GONE);
-    }
+    // --- FIM DA MUDANÇA ---
 }

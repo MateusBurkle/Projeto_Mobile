@@ -21,6 +21,10 @@
     <string name="error_senha_obrigatoria">A senha é obrigatória</string>
     <string name="error_peso_obrigatorio">O peso é obrigatório</string>
 
+    <string name="error_email_invalido">Formato de e-mail inválido</string>
+    <string name="error_senha_curta">A senha deve ter pelo menos 6 caracteres</string>
+    <string name="error_peso_invalido">Peso inválido</string>
+
     <string name="progress_title">Seu Progresso</string>
     <string name="water_progress_today">Progresso de Hoje</string>
     <string name="water_summary_format">Hoje: %1$d ml / %2$d ml</string>

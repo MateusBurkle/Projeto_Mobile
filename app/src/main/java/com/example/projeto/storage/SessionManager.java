@@ -11,8 +11,11 @@ import java.util.HashMap;
 
 public class SessionManager {
 
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
+    // --- MUDANÇAS AQUI ---
+    public SharedPreferences pref; // Tornar público
+    public SharedPreferences.Editor editor; // Tornar público
+    // --- FIM DA MUDANÇA ---
+
     Context _context;
 
     int PRIVATE_MODE = 0;
@@ -34,7 +37,7 @@ public class SessionManager {
     public void createLoginSession(String email) {
         editor.putBoolean(IS_LOGGED_IN, true);
         editor.putString(KEY_EMAIL, email);
-        editor.commit();
+        editor.commit(); // <-- Importante: 'commit()' aqui salva as mudanças acima
     }
 
     /**

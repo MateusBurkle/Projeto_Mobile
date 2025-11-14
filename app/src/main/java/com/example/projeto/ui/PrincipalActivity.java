@@ -1,10 +1,8 @@
 package com.example.projeto.ui;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,14 +12,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.projeto.R;
 import com.example.projeto.models.HistoricoAgua;
-import com.example.projeto.models.Task;
 import com.example.projeto.storage.AppDatabase;
 import com.example.projeto.storage.HistoricoAguaDao;
 import com.example.projeto.storage.SessionManager;
-import com.example.projeto.storage.TaskStorage;
+import com.example.projeto.storage.TaskDao;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -34,22 +36,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.graphics.Insets;
 
 public class PrincipalActivity extends AppCompatActivity {
 
     private TextView tvResumoAgua;
     private TextView tvResumoTarefas;
-    private TaskStorage taskStorage;
+    // private TaskStorage taskStorage; // <-- MUDANÇA: Removido
 
     // --- Variáveis do Banco de Dados e Sessão ---
     private HistoricoAguaDao historicoAguaDao;
+    private TaskDao taskDao; // <-- MUDANÇA: Adicionado
     private ExecutorService databaseExecutor;
     private int metaDiariaGlobal = 2000;
     private SessionManager session;
@@ -67,6 +65,7 @@ public class PrincipalActivity extends AppCompatActivity {
 
         databaseExecutor = Executors.newSingleThreadExecutor();
         historicoAguaDao = AppDatabase.getInstance(this).historicoAguaDao();
+        taskDao = AppDatabase.getInstance(this).taskDao(); // <-- MUDANÇA: Adicionado
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.telaPrincipal), (v, windowInsets) -> {
             Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -78,12 +77,8 @@ public class PrincipalActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar); // ISSO ESTÁ CORRETO
 
-        taskStorage = new TaskStorage(this);
+        // taskStorage = new TaskStorage(this); // <-- MUDANÇA: Removido
         tvResumoAgua = findViewById(R.id.tvResumoAgua);
-
-        // ---
-        // --- CORREÇÃO DE TYPO AQUI (R.id.) ---
-        // ---
         tvResumoTarefas = findViewById(R.id.tvResumoTarefas);
 
         // --- Botões (lógica existente) ---
@@ -113,25 +108,17 @@ public class PrincipalActivity extends AppCompatActivity {
         if (fabAddAgua != null) {
             fabAddAgua.setOnClickListener(v -> abrirBottomSheetAgua());
         }
-        // ---
-        // --- FIM DAS CORREÇÕES DE TYPO ---
-        // ---
     }
 
-    // ---
-    // --- INÍCIO DO CÓDIGO CORRETO DO MENU ---
-    // ---
-
+    // --- Código do Menu (sem alterações) ---
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Este método infla (cria) o menu na barra de ferramentas
         getMenuInflater().inflate(R.menu.menu_principal, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // Este método cuida do clique no item de menu
         if (item.getItemId() == R.id.action_logout) {
             session.logoutUser();
             finish();
@@ -139,10 +126,7 @@ public class PrincipalActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    // ---
-    // --- FIM DO CÓDIGO CORRETO DO MENU ---
-    // ---
+    // --- Fim do Código do Menu ---
 
     @Override
     protected void onResume() {
@@ -157,7 +141,7 @@ public class PrincipalActivity extends AppCompatActivity {
 
     private void atualizarResumos() {
         atualizarResumoAgua();
-        atualizarResumoTarefas();
+        atualizarResumoTarefas(); // <-- MUDANÇA: Este método foi atualizado
     }
 
     private void atualizarResumoAgua() {
@@ -190,19 +174,27 @@ public class PrincipalActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
+    // ---
+    // --- MUDANÇA PRINCIPAL AQUI ---
+    // ---
     private void atualizarResumoTarefas() {
-        List<Task> tasks = taskStorage.getAll();
-        int tarefasPendentes = 0;
-        if (tasks != null) {
-            for (Task task : tasks) {
-                if (!task.isConcluida()) {
-                    tarefasPendentes++;
-                }
-            }
-        }
-        String resumoTarefas = getString(R.string.task_summary_dashboard, tarefasPendentes);
-        tvResumoTarefas.setText(resumoTarefas);
+        // Roda a contagem em uma thread separada (obrigatório pelo Room)
+        databaseExecutor.execute(() -> {
+
+            // Pega a contagem de tarefas pendentes direto do banco
+            // (O método getPendingTasksCount() já existe no seu TaskDao.java)
+            int tarefasPendentes = taskDao.getPendingTasksCount();
+
+            // Atualiza a interface gráfica (TextView) na thread principal
+            runOnUiThread(() -> {
+                String resumoTarefas = getString(R.string.task_summary_dashboard, tarefasPendentes);
+                tvResumoTarefas.setText(resumoTarefas);
+            });
+        });
     }
+    // ---
+    // --- FIM DA MUDANÇA PRINCIPAL ---
+    // ---
 
 
     private void abrirBottomSheetAgua() {

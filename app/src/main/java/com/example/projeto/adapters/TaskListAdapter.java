@@ -1,124 +1,111 @@
 package com.example.projeto.adapters;
 
-import android.graphics.Paint; // alteração
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox; // alteração
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.projeto.R;
-import com.example.projeto.models.SubTask;
 import com.example.projeto.models.Task;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.VH> {
 
+    private final List<Task> tasks;
+    private final OnItemClick onItemClick;
+    private final OnToggleDone onToggleDone;
 
-    public interface OnItemClick { void onClick(Task t); }
-
-    public interface OnToggleDone { void onToggle(Task t, boolean done, int position); } // alteração
-
-    private final List<Task> data = new ArrayList<>();
-    private OnItemClick listener;
-    private OnToggleDone toggleListener;
-
-    public void setOnItemClick(OnItemClick l) { this.listener = l; }
-    public void setOnToggleDone(OnToggleDone l) { this.toggleListener = l; } // alteração
-
-    public void submit(List<Task> list) {
-        data.clear();
-        if (list != null) data.addAll(list);
-        notifyDataSetChanged();
+    public TaskListAdapter(List<Task> tasks, OnItemClick onItemClick, OnToggleDone onToggleDone) {
+        this.tasks = tasks;
+        this.onItemClick = onItemClick;
+        this.onToggleDone = onToggleDone;
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_tarefa, parent, false);
-        return new VH(v);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_tarefa, parent, false);
+        return new VH(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH h, int position) {
-        Task t = data.get(position);
+    public void onBindViewHolder(@NonNull VH holder, int position) {
+        Task task = tasks.get(position);
+        holder.tvNomeTarefa.setText(task.getNome());
+        holder.cbConcluida.setChecked(task.isConcluida());
 
-        h.titulo.setText(t.getTitulo());
-        String notas = t.getNotas() == null ? "" : t.getNotas().trim();
-        h.notas.setVisibility(notas.isEmpty() ? View.GONE : View.VISIBLE);
-        h.notas.setText(notas);
+        // --- MUDANÇA: O modelo Task não tem "Notas", então escondemos esse campo ---
+        holder.tvNotas.setVisibility(View.GONE);
+        // --- FIM DA MUDANÇA ---
 
-        List<SubTask> subs = t.getSubtarefas();
-        int qtd = subs == null ? 0 : subs.size();
-        h.meta.setText(qtd == 0 ? "Sem subtarefas" : (qtd + " subtarefa(s)"));
-
-        // Tarefa concluída: liga/desliga
-        h.chkConcluida.setOnCheckedChangeListener(null);      // alteração
-        h.chkConcluida.setChecked(t.isConcluida());           // alteração
-        applyDoneStyle(h, t.isConcluida());                   // alteração
-
-        h.chkConcluida.setOnCheckedChangeListener((btn, checked) -> { // alteração
-            if (toggleListener != null) {
-                toggleListener.onToggle(t, checked, h.getBindingAdapterPosition());
-            }
-            applyDoneStyle(h, checked);
-        });
-
-        // Tocar no item alterna o checkbox
-        h.itemView.setOnClickListener(v -> { // mantém seu comportamento + toggle
-            if (listener != null) listener.onClick(t);
-        });
-        h.itemView.setOnLongClickListener(v -> { // long-press: atalho para alternar
-            h.chkConcluida.performClick();
-            return true;
-        });
-    }
-
-    @Override public int getItemCount() { return data.size(); }
-
-    static class VH extends RecyclerView.ViewHolder {
-        TextView titulo, notas, meta;
-        CheckBox chkConcluida; // alteração
-        VH(@NonNull View v) {
-            super(v);
-            titulo = v.findViewById(R.id.tvTitulo);
-            notas  = v.findViewById(R.id.tvNotas);
-            meta   = v.findViewById(R.id.tvMeta);
-            chkConcluida = v.findViewById(R.id.chkConcluida); // alteração
-        }
-    }
-
-    // Visual quando concluída (risco e opacidade)
-    private void applyDoneStyle(VH h, boolean done) { // alteração
-        if (done) {
-            h.titulo.setPaintFlags(h.titulo.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            h.notas.setPaintFlags(h.notas.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            h.itemView.setAlpha(0.6f);
+        if (task.isConcluida()) {
+            holder.tvNomeTarefa.setPaintFlags(holder.tvNomeTarefa.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         } else {
-            h.titulo.setPaintFlags(h.titulo.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-            h.notas.setPaintFlags(h.notas.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-            h.itemView.setAlpha(1f);
+            holder.tvNomeTarefa.setPaintFlags(holder.tvNomeTarefa.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        }
+
+        int subtasksConcluidas = 0;
+        if (task.getSubtasks() != null) {
+            for (int i = 0; i < task.getSubtasks().size(); i++) {
+                if (task.getSubtasks().get(i).getDone()) {
+                    subtasksConcluidas++;
+                }
+            }
+            holder.tvContadorSubtasks.setText(subtasksConcluidas + " de " + task.getSubtasks().size() + " concluídas");
+        } else {
+            holder.tvContadorSubtasks.setText("0 subtasks");
         }
     }
-    public Task getItem(int position) { // alteração
-        return position >= 0 && position < getItemCount() ? data.get(position) : null;
+
+    @Override
+    public int getItemCount() {
+        return tasks.size();
     }
 
-    public void removeAt(int position) { // alteração
-        if (position >= 0 && position < getItemCount()) {
-            data.remove(position);
-            notifyItemRemoved(position);
+    public interface OnItemClick {
+        void onItemClick(long taskId);
+    }
+
+    public interface OnToggleDone {
+        void onToggleDone(int position);
+    }
+
+    class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView tvNomeTarefa;
+        TextView tvContadorSubtasks;
+        MaterialCheckBox cbConcluida;
+        TextView tvNotas; // <-- MUDANÇA: Campo adicionado do novo XML
+
+        public VH(@NonNull View itemView) {
+            super(itemView);
+            // --- MUDANÇA: IDs atualizados para bater com item_tarefa.xml ---
+            tvNomeTarefa = itemView.findViewById(R.id.tvTitulo);
+            tvContadorSubtasks = itemView.findViewById(R.id.tvMeta);
+            cbConcluida = itemView.findViewById(R.id.chkConcluida);
+            tvNotas = itemView.findViewById(R.id.tvNotas);
+            // --- FIM DA MUDANÇA ---
+
+            itemView.setOnClickListener(this);
+
+            cbConcluida.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                    onToggleDone.onToggleDone(getAdapterPosition());
+                }
+            });
         }
-    }
 
-    public void insertAt(int position, Task t) { // alteração
-        if (position < 0 || position > data.size()) position = data.size();
-        data.add(position, t);
-        notifyItemInserted(position);
+        @Override
+        public void onClick(View v) {
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                long taskId = tasks.get(getAdapterPosition()).getId();
+                onItemClick.onItemClick(taskId);
+            }
+        }
     }
 }

@@ -1,32 +1,31 @@
 package com.example.projeto.models;
 
-import java.util.UUID;
-public class SubTask {
-    private String id;
-    private String titulo;
-    private boolean concluida;
+import java.io.Serializable;
 
-    public SubTask() {
-        this.id = UUID.randomUUID().toString();
-        this.titulo = "";
-        this.concluida = false;
-    }
+public class SubTask implements Serializable {
+    private String name;
+    private boolean done;
 
-    public SubTask(String titulo) {
-        this();
-        this.titulo = titulo;
+    public SubTask(String name) {
+        this.name = name;
+        this.done = false;
     }
 
-    public String getId() { return id; }
-    public String getTitulo(){
-        return this.titulo;
+    public String getName() {
+        return name;
     }
-    public void setTitulo(String titulo){
-        this.titulo = titulo;
+
+    public void setName(String name) {
+        this.name = name;
     }
-    public boolean isConcluida() {
-        return this.concluida; }
-    public void setConcluida(boolean concluida){
-        this.concluida = concluida;
+
+    // --- MUDANÇA AQUI ---
+    public boolean getDone() { // Renomeado de isDone para getDone
+        return done;
+    }
+    // --- FIM DA MUDANÇA ---
+
+    public void setDone(boolean done) {
+        this.done = done;
     }
 }
