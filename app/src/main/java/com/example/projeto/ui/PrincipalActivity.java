@@ -13,6 +13,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.example.projeto.R;
 import com.example.projeto.models.HistoricoAgua;
 import com.example.projeto.models.Task;
@@ -74,22 +76,14 @@ public class PrincipalActivity extends AppCompatActivity {
 
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // --- Inflar o menu de Logout ---
-        toolbar.inflateMenu(R.menu.menu_principal);
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_logout) {
-                session.logoutUser();
-                finish(); // Fecha a PrincipalActivity
-                return true;
-            }
-            return false;
-        });
-        // --- FIM ---
+        setSupportActionBar(toolbar); // ISSO ESTÁ CORRETO
 
         taskStorage = new TaskStorage(this);
         tvResumoAgua = findViewById(R.id.tvResumoAgua);
+
+        // ---
+        // --- CORREÇÃO DE TYPO AQUI (R.id.) ---
+        // ---
         tvResumoTarefas = findViewById(R.id.tvResumoTarefas);
 
         // --- Botões (lógica existente) ---
@@ -119,12 +113,40 @@ public class PrincipalActivity extends AppCompatActivity {
         if (fabAddAgua != null) {
             fabAddAgua.setOnClickListener(v -> abrirBottomSheetAgua());
         }
+        // ---
+        // --- FIM DAS CORREÇÕES DE TYPO ---
+        // ---
     }
+
+    // ---
+    // --- INÍCIO DO CÓDIGO CORRETO DO MENU ---
+    // ---
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Este método infla (cria) o menu na barra de ferramentas
+        getMenuInflater().inflate(R.menu.menu_principal, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Este método cuida do clique no item de menu
+        if (item.getItemId() == R.id.action_logout) {
+            session.logoutUser();
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // ---
+    // --- FIM DO CÓDIGO CORRETO DO MENU ---
+    // ---
 
     @Override
     protected void onResume() {
         super.onResume();
-        // A checagem de login já foi para o onCreate
         atualizarResumos();
     }
 
@@ -206,14 +228,10 @@ public class PrincipalActivity extends AppCompatActivity {
 
         rgUnidade.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbMl) {
-                // --- CORREÇÃO AQUI ---
                 tilQtd.setHint("Quantidade (mL)");
-                // --- FIM DA CORREÇÃO ---
                 tilTamanhoCopo.setVisibility(View.GONE);
             } else {
-                // --- CORREÇÃO AQUI ---
                 tilQtd.setHint("Quantidade (copos)");
-                // --- FIM DA CORREÇÃO ---
                 tilTamanhoCopo.setVisibility(View.VISIBLE);
             }
         });
