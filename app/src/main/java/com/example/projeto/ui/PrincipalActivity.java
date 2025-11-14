@@ -3,19 +3,22 @@ package com.example.projeto.ui;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat; // Import necessário
+import androidx.core.content.ContextCompat;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.Menu; // <-- IMPORT ADICIONADO
+import android.view.MenuItem; // <-- IMPORT ADICIONADO
 import android.view.View;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.projeto.R;
-import com.example.projeto.models.HistoricoAgua; // Import do novo Model
+import com.example.projeto.models.HistoricoAgua;
 import com.example.projeto.models.Task;
-import com.example.projeto.storage.AppDatabase; // Import do novo DB
-import com.example.projeto.storage.HistoricoAguaDao; // Import do novo DAO
+import com.example.projeto.storage.AppDatabase;
+import com.example.projeto.storage.HistoricoAguaDao;
+import com.example.projeto.storage.SessionManager; // <-- IMPORT ADICIONADO
 import com.example.projeto.storage.TaskStorage;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -24,19 +27,18 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.common.util.concurrent.ListenableFuture; // Import necessário
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.List;
-import java.util.concurrent.ExecutorService; // Import necessário
-import java.util.concurrent.Executors; // Import necessário
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-// NOVO: Imports corretos para Edge-to-Edge
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.graphics.Insets; // <--- Esta é a correção
+import androidx.core.graphics.Insets;
 
 public class PrincipalActivity extends AppCompatActivity {
 
@@ -44,10 +46,11 @@ public class PrincipalActivity extends AppCompatActivity {
     private TextView tvResumoTarefas;
     private TaskStorage taskStorage;
 
-    // --- MUDANÇA: Variáveis do Banco de Dados ---
+    // --- MUDANÇA: Variáveis do Banco de Dados e Sessão ---
     private HistoricoAguaDao historicoAguaDao;
     private ExecutorService databaseExecutor;
-    private int metaDiariaGlobal = 2000; // Valor padrão
+    private int metaDiariaGlobal = 2000;
+    private SessionManager session; // <-- VARIÁVEL ADICIONADA
     // --- FIM DA MUDANÇA ---
 
     @Override
@@ -55,24 +58,34 @@ public class PrincipalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
-        // --- MUDANÇA: Configura o Executor para o DB ---
-        // Cria um pool de threads para rodar as queries do banco
-        databaseExecutor = Executors.newSingleThreadExecutor();
-        // Pega a instância do DAO
-        historicoAguaDao = AppDatabase.getInstance(this).historicoAguaDao();
+        // --- MUDANÇA: Instanciar SessionManager ---
+        session = new SessionManager(getApplicationContext());
         // --- FIM DA MUDANÇA ---
 
-        // --- CORREÇÃO DO CÓDIGO EDGE-TO-EDGE ---
+        databaseExecutor = Executors.newSingleThreadExecutor();
+        historicoAguaDao = AppDatabase.getInstance(this).historicoAguaDao();
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.telaPrincipal), (v, windowInsets) -> {
             Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return windowInsets;
         });
-        // --- FIM DA CORREÇÃO ---
 
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // --- MUDANÇA: Inflar o menu de Logout ---
+        toolbar.inflateMenu(R.menu.menu_principal);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_logout) {
+                session.logoutUser();
+                finish(); // Fecha a PrincipalActivity
+                return true;
+            }
+            return false;
+        });
+        // --- FIM DA MUDANÇA ---
 
         taskStorage = new TaskStorage(this);
         tvResumoAgua = findViewById(R.id.tvResumoAgua);
@@ -110,49 +123,39 @@ public class PrincipalActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Removemos o 'checkAndResetDailyProgress' - o DB cuida disso.
+        // Adicionamos o checkLogin aqui por segurança
+        session.checkLogin();
         atualizarResumos();
     }
-
-    // --- MÉTODOS DE LÓGICA DO DASHBOARD ---
 
     private String getTodayDateString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(new Date());
     }
 
-    // --- MUDANÇA: A FUNÇÃO 'checkAndResetDailyProgress' FOI REMOVIDA ---
-    // (A lógica de reset agora é implícita ao salvar por data)
-
     private void atualizarResumos() {
         atualizarResumoAgua();
         atualizarResumoTarefas();
     }
 
-    // --- MUDANÇA GRANDE: ATUALIZAR RESUMO DE ÁGUA LENDO DO DB ---
     private void atualizarResumoAgua() {
-        // Pega a meta com base no peso (ainda salvo no SharedPreferences)
         SharedPreferences sp = getSharedPreferences("user_prefs", MODE_PRIVATE);
         int weight = sp.getInt("weight_kg", 0);
         metaDiariaGlobal = (weight > 0) ? weight * 40 : 2000;
 
         String today = getTodayDateString();
 
-        // 1. Pega os dados de HOJE do banco (em uma thread de background)
         ListenableFuture<HistoricoAgua> future = historicoAguaDao.getByDate(today);
 
-        // 2. Define o que fazer quando o dado chegar (listener)
         future.addListener(() -> {
             try {
                 HistoricoAgua historicoHoje = future.get();
                 int currentWater = 0;
 
                 if (historicoHoje != null) {
-                    // Se já existe um registro para hoje, pega o total salvo
                     currentWater = historicoHoje.getTotalMl();
                 }
 
-                // 3. Atualiza a UI (na thread principal)
                 int finalCurrentWater = currentWater;
                 runOnUiThread(() -> {
                     String resumoAgua = getString(R.string.water_summary_dashboard, finalCurrentWater, metaDiariaGlobal);
@@ -180,7 +183,6 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
 
-    // --- MUDANÇA GRANDE: SALVAR ÁGUA NO DB ---
     private void abrirBottomSheetAgua() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.activity_add_agua, null);
@@ -235,9 +237,7 @@ public class PrincipalActivity extends AppCompatActivity {
                 coposAdicionados = copos;
             }
 
-            // --- INÍCIO DA LÓGICA DE SALVAR NO DB ---
             salvarConsumoNoBanco(mlAdicionados, coposAdicionados);
-            // --- FIM DA LÓGICA DE SALVAR NO DB ---
 
             Toast.makeText(this, "Adicionado: " + mlAdicionados + " mL", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
@@ -249,15 +249,12 @@ public class PrincipalActivity extends AppCompatActivity {
     private void salvarConsumoNoBanco(int mlAdicionados, int coposAdicionados) {
         String today = getTodayDateString();
 
-        // Roda a lógica de salvar/atualizar em uma thread de background
         databaseExecutor.execute(() -> {
-            // 1. Tenta buscar o registro de hoje
             ListenableFuture<HistoricoAgua> future = historicoAguaDao.getByDate(today);
             try {
-                HistoricoAgua historicoHoje = future.get(); // Espera síncrona (OK, estamos na thread de BG)
+                HistoricoAgua historicoHoje = future.get();
 
                 if (historicoHoje == null) {
-                    // 2. Se não existe, cria um NOVO registro para hoje
                     HistoricoAgua novoHistorico = new HistoricoAgua(
                             today,
                             mlAdicionados,
@@ -266,14 +263,12 @@ public class PrincipalActivity extends AppCompatActivity {
                     );
                     historicoAguaDao.insert(novoHistorico);
                 } else {
-                    // 3. Se já existe, atualiza o registro
                     historicoHoje.setTotalMl(historicoHoje.getTotalMl() + mlAdicionados);
                     historicoHoje.setTotalCopos(historicoHoje.getTotalCopos() + coposAdicionados);
-                    historicoHoje.setMetaMl(metaDiariaGlobal); // Garante que a meta está atualizada
+                    historicoHoje.setMetaMl(metaDiariaGlobal);
                     historicoAguaDao.update(historicoHoje);
                 }
 
-                // 4. Após salvar, atualiza a UI (na thread principal)
                 runOnUiThread(() -> {
                     atualizarResumoAgua();
                 });

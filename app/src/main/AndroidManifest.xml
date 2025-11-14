@@ -12,9 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.HidraMeta">
 
-        <!-- Launcher -->
         <activity
-            android:name=".ui.CadastroActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,39 +21,35 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.LoginActivity" />
+
+        <activity android:name=".ui.CadastroActivity" />
+
         <activity android:name=".ui.PrincipalActivity" />
 
         <activity
-        android:name=".ui.MainActivity"
-        android:parentActivityName=".ui.PrincipalActivity">
-        <meta-data
-        android:name="android.support.PARENT_ACTIVITY"
-        android:value=".ui.PrincipalActivity" />
-    </activity>
+            android:name=".ui.TarefasActivity"
+            android:parentActivityName=".ui.PrincipalActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.PrincipalActivity" />
+        </activity>
 
-    <activity
-        android:name=".ui.TarefasActivity"
-        android:parentActivityName=".ui.PrincipalActivity">
-        <meta-data
-        android:name="android.support.PARENT_ACTIVITY"
-        android:value=".ui.PrincipalActivity" />
-    </activity>
+        <activity
+            android:name=".ui.ProgressoActivity"
+            android:parentActivityName=".ui.PrincipalActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.PrincipalActivity" />
+        </activity>
 
-    <activity
-        android:name=".ui.ProgressoActivity"
-        android:parentActivityName=".ui.PrincipalActivity">
-        <meta-data
-        android:name="android.support.PARENT_ACTIVITY"
-        android:value=".ui.PrincipalActivity" />
-    </activity>
+        <activity
+            android:name=".ui.ListaTarefasActivity"
+            android:parentActivityName=".ui.PrincipalActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.PrincipalActivity" />
+        </activity>
 
-    <activity
-        android:name=".ui.ListaTarefasActivity"
-        android:parentActivityName=".ui.PrincipalActivity">
-        <meta-data
-        android:name="android.support.PARENT_ACTIVITY"
-        android:value=".ui.PrincipalActivity" />
-    </activity>
-
-</application>
-    </manifest>
+    </application>
+</manifest>

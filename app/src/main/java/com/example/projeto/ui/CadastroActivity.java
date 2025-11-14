@@ -10,9 +10,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.graphics.Insets; // <--- NOVO: Import da classe correta
+import androidx.core.graphics.Insets;
 
 import com.example.projeto.R;
+import com.example.projeto.storage.SessionManager; // <-- IMPORT ADICIONADO
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -23,28 +24,20 @@ public class CadastroActivity extends AppCompatActivity {
     private TextInputEditText editNome, editEmail, editSenha, editPeso;
     private MaterialButton btnCadastrar;
 
+    private SessionManager session; // <-- VARIÁVEL ADICIONADA
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
 
-        // --- CORREÇÃO DO CÓDIGO EDGE-TO-EDGE ---
-        // Aplicamos o listener ao 'telaCadastro' (o LinearLayout dentro do ScrollView)
-        // para que ele adicione padding interno e empurre o conteúdo para baixo.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.telaCadastro), (v, windowInsets) -> {
-            // MUDANÇA: Usando 'androidx.core.graphics.Insets' para compatibilidade
             Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-
-            // Aplicamos o padding no topo e na base do LinearLayout
-            // Mantemos o padding lateral original (32dp) definido no XML
             v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), systemBars.bottom);
-
-            // Retornamos os insets originais para que outros componentes (como a IME)
-            // ainda possam reagir a eles.
             return windowInsets;
         });
-        // --- FIM DA CORREÇÃO ---
 
+        session = new SessionManager(getApplicationContext()); // <-- LINHA ADICIONADA
 
         layoutNome = findViewById(R.id.layoutNome);
         editNome = findViewById(R.id.editNome);
@@ -63,11 +56,17 @@ public class CadastroActivity extends AppCompatActivity {
         btnCadastrar.setOnClickListener(v -> {
             if (validarCampos()) {
                 salvarDados();
+
+                // --- MUDANÇA ADICIONADA ---
+                // Loga o usuário automaticamente após o cadastro
+                String email = editEmail.getText().toString().trim();
+                session.createLoginSession(email);
+                // --- FIM DA MUDANÇA ---
+
                 Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show();
 
                 // Navega para a tela principal
                 Intent intent = new Intent(CadastroActivity.this, PrincipalActivity.class);
-                // Limpa as telas anteriores para que o usuário não possa "voltar" para o cadastro
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }
@@ -78,7 +77,9 @@ public class CadastroActivity extends AppCompatActivity {
         boolean valido = true;
 
         if (TextUtils.isEmpty(editNome.getText())) {
+            // --- LINHA CORRIGIDA ---
             layoutNome.setError(getString(R.string.error_nome_obrigatorio));
+            // --- FIM DA CORREÇÃO ---
             valido = false;
         } else {
             layoutNome.setError(null);
@@ -115,12 +116,20 @@ public class CadastroActivity extends AppCompatActivity {
         editor.putString("user_name", editNome.getText().toString().trim());
         editor.putString("user_email", editEmail.getText().toString().trim());
 
-        // Salva o peso como um inteiro (ou float, mas int é mais simples para o cálculo)
+        // --- MUDANÇA ADICIONADA ---
+        // ⚠️ AVISO: Salvar senhas assim é muito inseguro.
+        // Para um projeto de faculdade/estudo está OK para fazer o login funcionar.
+        // Em um app real, use um hash (SHA-256) e salve em banco.
+        editor.putString("user_pass", editSenha.getText().toString().trim());
+        // --- FIM DA MUDANÇA ---
+
+
+        // Salva o peso como um inteiro
         try {
             int peso = Integer.parseInt(editPeso.getText().toString().trim());
             editor.putInt("weight_kg", peso);
         } catch (NumberFormatException e) {
-            editor.putInt("weight_kg", 0); // Salva 0 se o valor for inválido
+            editor.putInt("weight_kg", 0);
         }
 
         editor.apply();
