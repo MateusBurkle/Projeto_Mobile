@@ -76,7 +76,7 @@ public class SessionManager {
     }
 
     /**
-     * Checagem rápida de login
+     * Checagem rápida de login teste
      **/
     public boolean isLoggedIn() {
         return pref.getBoolean(IS_LOGGED_IN, false);
