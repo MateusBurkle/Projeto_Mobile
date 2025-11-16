@@ -1,36 +1,31 @@
 package com.example.projeto.storage;
 
 import android.content.Context;
-
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.room.TypeConverters;
 
 import com.example.projeto.models.HistoricoAgua;
-import com.example.projeto.models.Task;
-import com.example.projeto.models.User; // <-- 1. IMPORTAR USER
 
-// 2. ADICIONAR USER E MUDAR VERSÃO PARA 3 (ou um número maior que a atual)
-@Database(entities = {HistoricoAgua.class, Task.class, User.class}, version = 3)
-@TypeConverters({SubTaskListConverter.class})
+// Lista todas as tabelas (Entities) que o banco de dados terá
+@Database(entities = {HistoricoAgua.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
+    // Diz ao Room qual DAO (interface de queries) esta classe "conhece"
     public abstract HistoricoAguaDao historicoAguaDao();
-    public abstract TaskDao taskDao();
-    public abstract UserDao userDao(); // <-- 3. ADICIONAR O MÉTODO DO USERDAO
 
+    // --- Singleton Pattern (Garante que só exista UMA instância do banco de dados) ---
     private static volatile AppDatabase INSTANCE;
 
-    public static AppDatabase getInstance(Context context) {
+    public static AppDatabase getInstance(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    AppDatabase.class, "app_database")
-                            // Isso vai apagar o banco antigo e criar o novo
-                            // com a tabela 'users'. Perfeito para desenvolvimento.
-                            .fallbackToDestructiveMigration()
+                                    AppDatabase.class, "hidrameta_database")
+                            // Permite queries na thread principal (NÃO RECOMENDADO, mas simplifica)
+                            // Vamos trocar isso por threads na Activity
+                            // .allowMainThreadQueries()
                             .build();
                 }
             }
