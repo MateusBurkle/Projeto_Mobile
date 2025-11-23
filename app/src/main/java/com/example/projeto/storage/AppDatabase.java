@@ -6,15 +6,22 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.example.projeto.models.HistoricoAgua;
+import com.example.projeto.models.Task;
+import com.example.projeto.models.User;
 
-// Lista todas as tabelas (Entities) que o banco de dados terá
-@Database(entities = {HistoricoAgua.class}, version = 1, exportSchema = false)
+// AQUI: Adicionei User.class e Task.class para criar as tabelas
+@Database(entities = {HistoricoAgua.class, User.class, Task.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
-    // Diz ao Room qual DAO (interface de queries) esta classe "conhece"
+    // DAOs existentes
     public abstract HistoricoAguaDao historicoAguaDao();
 
-    // --- Singleton Pattern (Garante que só exista UMA instância do banco de dados) ---
+    // AQUI: Adicionei o método que estava faltando para o Cadastro funcionar
+    public abstract UserDao userDao();
+
+    // AQUI: Já deixei pronto para as Tarefas
+    public abstract TaskDao taskDao();
+
     private static volatile AppDatabase INSTANCE;
 
     public static AppDatabase getInstance(final Context context) {
@@ -23,9 +30,6 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "hidrameta_database")
-                            // Permite queries na thread principal (NÃO RECOMENDADO, mas simplifica)
-                            // Vamos trocar isso por threads na Activity
-                            // .allowMainThreadQueries()
                             .build();
                 }
             }

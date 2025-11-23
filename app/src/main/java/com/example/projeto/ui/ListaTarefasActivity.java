@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout; // Import necessário para o layout vazio
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,49 +34,62 @@ import java.util.concurrent.Executors;
 public class ListaTarefasActivity extends AppCompatActivity {
 
     private RecyclerView rvTarefas;
+    private LinearLayout layoutVazio; // Referência para a tela de "Vazio"
     private TaskListAdapter adapter;
     private final List<Task> tasks = new ArrayList<>();
 
-    // --- MUDANÇA AQUI ---
     private TaskDao taskDao;
     private ExecutorService databaseExecutor;
-    // --- FIM DA MUDANÇA ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_tarefas);
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        // Configuração segura da Toolbar
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar); // ID correto do XML atualizado
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Lista de Tarefas");
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Lista de Tarefas");
+        }
 
-        // --- MUDANÇA AQUI ---
-        // Inicializa o acesso ao banco de dados
+        // Inicializa Banco de Dados
         databaseExecutor = Executors.newSingleThreadExecutor();
         taskDao = AppDatabase.getInstance(this).taskDao();
-        // --- FIM DA MUDANÇA ---
 
         rvTarefas = findViewById(R.id.rvTarefas);
+        layoutVazio = findViewById(R.id.layoutVazio);
+
+        // Configura o botão de "Criar primeira tarefa"
+        findViewById(R.id.btnCriarPrimeiraTarefa).setOnClickListener(v -> {
+            startActivity(new Intent(ListaTarefasActivity.this, TarefasActivity.class));
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadTasks(); // Carrega as tarefas do banco toda vez que a tela é exibida
+        loadTasks();
     }
 
     private void loadTasks() {
-        // --- MUDANÇA AQUI ---
-        // Busca as tarefas em uma thread separada
         databaseExecutor.execute(() -> {
             List<Task> loadedTasks = taskDao.getAllTasks();
 
-            // Atualiza a UI na thread principal
             runOnUiThread(() -> {
                 tasks.clear();
                 tasks.addAll(loadedTasks);
+
+                // Lógica para mostrar/esconder a tela de "vazio"
+                if (tasks.isEmpty()) {
+                    rvTarefas.setVisibility(View.GONE);
+                    layoutVazio.setVisibility(View.VISIBLE);
+                } else {
+                    rvTarefas.setVisibility(View.VISIBLE);
+                    layoutVazio.setVisibility(View.GONE);
+                }
+
                 if (adapter == null) {
                     setupRecyclerView();
                 } else {
@@ -83,25 +97,20 @@ public class ListaTarefasActivity extends AppCompatActivity {
                 }
             });
         });
-        // --- FIM DA MUDANÇA ---
     }
 
     private void setupRecyclerView() {
         adapter = new TaskListAdapter(tasks,
-                // OnItemClick (agora passa taskId)
                 taskId -> {
                     Intent intent = new Intent(this, TarefasActivity.class);
-                    intent.putExtra("TASK_ID", taskId); // <-- MUDANÇA AQUI
+                    intent.putExtra("TASK_ID", taskId);
                     startActivity(intent);
                 },
-                // OnToggleDone (agora atualiza no banco)
                 position -> {
-                    // --- MUDANÇA AQUI ---
                     Task task = tasks.get(position);
                     task.setConcluida(!task.isConcluida());
                     databaseExecutor.execute(() -> taskDao.update(task));
                     adapter.notifyItemChanged(position);
-                    // --- FIM DA MUDANÇA ---
                 }
         );
         rvTarefas.setLayoutManager(new LinearLayoutManager(this));
@@ -120,29 +129,36 @@ public class ListaTarefasActivity extends AppCompatActivity {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-
-                // --- MUDANÇA AQUI ---
                 Task taskToDelete = tasks.get(position);
 
-                databaseExecutor.execute(() -> taskDao.delete(taskToDelete)); // Deleta do banco
-                tasks.remove(position); // Remove da lista local
-                adapter.notifyItemRemoved(position); // Atualiza o adapter
+                databaseExecutor.execute(() -> taskDao.delete(taskToDelete));
+                tasks.remove(position);
+                adapter.notifyItemRemoved(position);
+
+                // Se ficou vazio após deletar, mostra a tela de vazio
+                if (tasks.isEmpty()) {
+                    rvTarefas.setVisibility(View.GONE);
+                    layoutVazio.setVisibility(View.VISIBLE);
+                }
 
                 Snackbar.make(rvTarefas, "Tarefa excluída", Snackbar.LENGTH_LONG)
                         .setAction("DESFAZER", v -> {
-                            // Adiciona de volta no banco e na lista
                             databaseExecutor.execute(() -> taskDao.insert(taskToDelete));
                             tasks.add(position, taskToDelete);
                             adapter.notifyItemInserted(position);
+                            rvTarefas.setVisibility(View.VISIBLE);
+                            layoutVazio.setVisibility(View.GONE);
                         }).show();
-                // --- FIM DA MUDANÇA ---
             }
 
-            // Lógica para desenhar o fundo vermelho (sem mudanças)
             @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                // Tenta carregar o ícone de forma segura
                 Drawable icon = ContextCompat.getDrawable(ListaTarefasActivity.this, R.drawable.icon_delete_24);
+                if (icon == null) return; // Evita crash se a imagem não existir
+
                 ColorDrawable background = new ColorDrawable(Color.RED);
                 View itemView = viewHolder.itemView;
                 int backgroundCornerOffset = 20;
@@ -151,16 +167,21 @@ public class ListaTarefasActivity extends AppCompatActivity {
                 int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
                 int iconBottom = iconTop + icon.getIntrinsicHeight();
 
-                if (dX > 0) { // Swiping to the right
-                    // ... (código original)
-                } else if (dX < 0) { // Swiping to the left
+                if (dX > 0) { // Direita
+                    int iconLeft = itemView.getLeft() + iconMargin;
+                    int iconRight = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
+                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+
+                    background.setBounds(itemView.getLeft(), itemView.getTop(),
+                            itemView.getLeft() + ((int) dX) + backgroundCornerOffset, itemView.getBottom());
+                } else if (dX < 0) { // Esquerda
                     int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
                     int iconRight = itemView.getRight() - iconMargin;
                     icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
 
                     background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
                             itemView.getTop(), itemView.getRight(), itemView.getBottom());
-                } else { // view is unSwiped
+                } else {
                     background.setBounds(0, 0, 0, 0);
                 }
                 background.draw(c);
@@ -170,8 +191,6 @@ public class ListaTarefasActivity extends AppCompatActivity {
         }).attachToRecyclerView(rvTarefas);
     }
 
-    // --- MUDANÇA AQUI ---
-    // Adiciona o menu para "Excluir Concluídas"
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_lista_tarefas, menu);
@@ -184,7 +203,7 @@ public class ListaTarefasActivity extends AppCompatActivity {
             deleteCompletedTasks();
             return true;
         } else if (item.getItemId() == android.R.id.home) {
-            finish(); // Trata o clique no botão "voltar" da toolbar
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -193,10 +212,8 @@ public class ListaTarefasActivity extends AppCompatActivity {
     private void deleteCompletedTasks() {
         databaseExecutor.execute(() -> {
             taskDao.deleteCompletedTasks();
-            // Recarrega as tarefas na UI thread
             runOnUiThread(this::loadTasks);
         });
         Snackbar.make(rvTarefas, "Tarefas concluídas foram excluídas", Snackbar.LENGTH_SHORT).show();
     }
-    // --- FIM DA MUDANÇA ---
 }
