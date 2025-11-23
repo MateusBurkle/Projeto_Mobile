@@ -1,7 +1,10 @@
 package com.example.projeto.ui;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,10 +16,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.example.projeto.R;
 import com.example.projeto.models.HistoricoAgua;
@@ -38,34 +45,30 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class PrincipalActivity extends AppCompatActivity {
 
     private TextView tvResumoAgua;
     private TextView tvResumoTarefas;
-    // private TaskStorage taskStorage; // <-- MUDANÇA: Removido
 
-    // --- Variáveis do Banco de Dados e Sessão ---
     private HistoricoAguaDao historicoAguaDao;
-    private TaskDao taskDao; // <-- MUDANÇA: Adicionado
+    private TaskDao taskDao;
     private ExecutorService databaseExecutor;
     private int metaDiariaGlobal = 2000;
     private SessionManager session;
-    // --- FIM ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
-        // --- Instanciar SessionManager ---
         session = new SessionManager(getApplicationContext());
-        session.checkLogin(); // Garante que o usuário esteja logado
-        // --- FIM ---
+        session.checkLogin();
 
         databaseExecutor = Executors.newSingleThreadExecutor();
         historicoAguaDao = AppDatabase.getInstance(this).historicoAguaDao();
-        taskDao = AppDatabase.getInstance(this).taskDao(); // <-- MUDANÇA: Adicionado
+        taskDao = AppDatabase.getInstance(this).taskDao();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.telaPrincipal), (v, windowInsets) -> {
             Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -73,15 +76,13 @@ public class PrincipalActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar); // ISSO ESTÁ CORRETO
+        setSupportActionBar(toolbar);
 
-        // taskStorage = new TaskStorage(this); // <-- MUDANÇA: Removido
         tvResumoAgua = findViewById(R.id.tvResumoAgua);
         tvResumoTarefas = findViewById(R.id.tvResumoTarefas);
 
-        // --- Botões (lógica existente) ---
+        // --- Botões ---
         View btnAdicionarTarefa = findViewById(R.id.btnAdicionarTarefa);
         if (btnAdicionarTarefa != null) {
             btnAdicionarTarefa.setOnClickListener(v ->
@@ -108,9 +109,36 @@ public class PrincipalActivity extends AppCompatActivity {
         if (fabAddAgua != null) {
             fabAddAgua.setOnClickListener(v -> abrirBottomSheetAgua());
         }
+
+        // --- CÓDIGO NOVO: Iniciar o Agendamento das Notificações ---
+        iniciarAgendamentoNotificacoes();
+        pedirPermissaoNotificacao();
     }
 
-    // --- Código do Menu (sem alterações) ---
+    private void iniciarAgendamentoNotificacoes() {
+        // Configura para rodar a cada 15 minutos (mínimo permitido pelo Android)
+        PeriodicWorkRequest lembreteRequest =
+                new PeriodicWorkRequest.Builder(LembreteAguaWorker.class, 15, TimeUnit.MINUTES)
+                        .build();
+
+        // Enfileira o trabalho (KEEP garante que não vamos duplicar se já estiver agendado)
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "LembreteAguaWork",
+                ExistingPeriodicWorkPolicy.KEEP,
+                lembreteRequest
+        );
+    }
+
+    private void pedirPermissaoNotificacao() {
+        // Pede permissão apenas se for Android 13 ou superior (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+    }
+
+    // --- Menu e Resumos (Mantidos iguais) ---
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_principal, menu);
@@ -126,7 +154,6 @@ public class PrincipalActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    // --- Fim do Código do Menu ---
 
     @Override
     protected void onResume() {
@@ -141,7 +168,7 @@ public class PrincipalActivity extends AppCompatActivity {
 
     private void atualizarResumos() {
         atualizarResumoAgua();
-        atualizarResumoTarefas(); // <-- MUDANÇA: Este método foi atualizado
+        atualizarResumoTarefas();
     }
 
     private void atualizarResumoAgua() {
@@ -174,29 +201,17 @@ public class PrincipalActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    // ---
-    // --- MUDANÇA PRINCIPAL AQUI ---
-    // ---
     private void atualizarResumoTarefas() {
-        // Roda a contagem em uma thread separada (obrigatório pelo Room)
         databaseExecutor.execute(() -> {
-
-            // Pega a contagem de tarefas pendentes direto do banco
-            // (O método getPendingTasksCount() já existe no seu TaskDao.java)
             int tarefasPendentes = taskDao.getPendingTasksCount();
-
-            // Atualiza a interface gráfica (TextView) na thread principal
             runOnUiThread(() -> {
                 String resumoTarefas = getString(R.string.task_summary_dashboard, tarefasPendentes);
                 tvResumoTarefas.setText(resumoTarefas);
             });
         });
     }
-    // ---
-    // --- FIM DA MUDANÇA PRINCIPAL ---
-    // ---
 
-
+    // --- BottomSheet Água (Mantido igual) ---
     private void abrirBottomSheetAgua() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.activity_add_agua, null);
@@ -207,7 +222,7 @@ public class PrincipalActivity extends AppCompatActivity {
 
         RadioGroup rgUnidade = view.findViewById(R.id.rgUnidade);
         MaterialRadioButton rbMl = view.findViewById(R.id.rbMl);
-        MaterialRadioButton rbCopos = view.findViewById(R.id.rbCopos);
+        // MaterialRadioButton rbCopos = view.findViewById(R.id.rbCopos); // Não usado diretamente, mas presente no layout
 
         TextInputLayout tilQtd = view.findViewById(R.id.tilQuantidade);
         TextInputEditText etQtd = view.findViewById(R.id.etQuantidade);

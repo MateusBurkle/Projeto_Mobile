@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -50,6 +52,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.PrincipalActivity" />
         </activity>
+
+        <service
+            android:name=".ui.LembreteAguaWorker"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
 
     </application>
 </manifest>

@@ -58,4 +58,6 @@ dependencies {
     // --- ESTA É A LINHA QUE FALTAVA (CORREÇÃO) ---
     implementation("com.google.guava:guava:33.0.0-android")
     // --- FIM DA CORREÇÃO ---
+    implementation("androidx.work:work-runtime:2.9.0")
+
 }
